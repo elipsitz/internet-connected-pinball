@@ -1,0 +1,25 @@
+
+
+ Pin # | Name     | Pin Type
+-----------------------------
+   1   | A8       | Input
+   2   | A9       | Input
+   3   | A10      | Input
+   4   | A11      | Input
+   5   | A12      | Input
+   6   | A13      | Input
+   7   | A14      | Input
+   8   | A15      | Input
+   9   | CLOCK    | Input
+  10   | GND      | GND
+  11   | NC       | Input
+  12   | CLOCKOUT | Output
+  13   | OUTPUT   | Output
+  14   | A9OUT    | Output
+  15   | A8OUT    | Output
+  16   | NC       | NC
+  17   | NC       | NC
+  18   | RW       | Input
+  19   | VMA      | Input
+  20   | VCC      | VCC
+

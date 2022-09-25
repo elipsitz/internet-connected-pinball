@@ -1,0 +1,42 @@
+%SIGNAL
+PIN   3 =  A10 
+PIN  15 =  A10_OUT 
+PIN   1 =  A8 
+PIN   4 =  A11 
+PIN   5 =  A12 
+PIN   6 =  A13 
+PIN   7 =  A14 
+PIN   8 =  A15 
+PIN   2 =  A9 
+PIN  14 =  A9_OUT 
+PIN   9 =  CLOCK 
+PIN  12 =  CLOCK_OUT 
+PIN  13 =  OUTPUT 
+PIN  18 =  RW 
+PIN  19 =  VMA 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+A8_OUT =>
+    A8
+
+A9_OUT =>
+    A9
+
+ADDR_HIGH =>
+    !A10 & !A11 & A12 & !A13 & !A14 & !A15
+
+ADDR_LOW =>
+    !A10 & !A8 & !A11 & !A12 & !A13 & !A14 & !A15 & !A9
+
+CLOCK_OUT =>
+    CLOCK
+
+OUTPUT =>
+    !A10 & !A11 & A12 & !A13 & !A14 & !A15 & !RW & VMA
+  # !A10 & !A8 & !A11 & !A13 & !A14 & !A15 & !A9 & !RW & VMA
+
+%END

@@ -1,0 +1,24 @@
+GAL16V8
+addrdecd
+
+A8  A9        A10    A11    A12    A13 A14 A15 CLOCK GND
+NC  CLOCKOUT  OUTPUT A9OUT  A8OUT  NC  NC  RW  VMA   VCC
+
+OUTPUT = /A10 * /A11 * A12 * /A13 * /A14 * /A15 * /RW * VMA + /A8 * /A9 * /A10 * /A11 * /A13 * /A14 * /A15 * /RW * VMA
+CLOCKOUT = CLOCK
+A8OUT = A8
+A9OUT = A9
+
+DESCRIPTION
+
+Logic:
+
+ADDR_LOW  = !A15 & !A14 & !A13 & !A12 & !A11 & !A10 & !A9 & !A8 ;
+ADDR_HIGH = !A15 & !A14 & !A13 &  A12 & !A11 & !A10 ;
+OUTPUT    = (ADDR_LOW | ADDR_HIGH) & VMA & (!RW) ;
+CLOCK_OUT = CLOCK ;
+
+Output is true if we're writing (!RW), the address is valid (VMA),
+and the address is in either the low range or the high range.
+
+The clock is passed through.
