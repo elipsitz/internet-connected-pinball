@@ -1,7 +1,7 @@
 Name     ADDRESSDECODE ;
 PartNo   00 ;
-Date     2022-09-18 ;
-Revision 00 ;
+Date     2022-09-24 ;
+Revision 01 ;
 Designer Eli Lipsitz ;
 Company  ;
 Assembly ;
@@ -10,22 +10,37 @@ Device   G16V8AS ;
 
 
 /* *************** INPUT PINS ******************** */
-PIN [8,7,6,5,4,3,2,1] = [A15..8] ;        /* Address pins                   */
-PIN 9 = CLOCK ;                           /* Clock (to pass through)        */ 
-PIN 19 = VMA ;                            /* Valid memory address           */ 
-PIN 18  = RW ;                            /* Read (high) / Write (low)      */ 
+PIN [9,8,7,6,5,4,3,2,1] = [A15..7] ;      /* Address pins                   */
+PIN 19 = CLOCK ;                          /* Clock (to pass through)        */ 
+PIN 18 = VMA ;                            /* Valid memory address           */ 
+PIN 17  = RW ;                            /* Read (high) / Write (low)      */ 
  
 /* *************** OUTPUT PINS ******************** */
-PIN 12 = CLOCK_OUT ;                      /* Clock signal, passed through */
-PIN 13 = OUTPUT ;                         /* Output, "is it writing?" */
-PIN 14 = A9_OUT ;                         /* A9, passed through */
-PIN 15 = A10_OUT ;                        /* A10, passed through */
+PIN 12 = OUT_CLOCK ;                      /* Clock signal, passed through */
+PIN 13 = OUT_WRITE_ENABLE ;               /* Output, "is it writing?" */
+PIN 14 = OUT_A9 ;                         /* A9, passed through */
+PIN 15 = OUT_A8 ;                         /* A8, passed through */
 
 /* *************** LOGIC       ******************** */
-ADDR_LOW  = !A15 & !A14 & !A13 & !A12 & !A11 & !A10 & !A9 & !A8 ;
-ADDR_HIGH = !A15 & !A14 & !A13 &  A12 & !A11 & !A10 ;
 
-OUTPUT    = (ADDR_LOW # ADDR_HIGH) & VMA & (!RW) ;
-CLOCK_OUT = CLOCK ;
-A8_OUT = A8;
-A9_OUT = A9;
+/*
+    This logic decodes perfectly. However, the logic used in the physical MPU
+    (below) is used instead, in case the mirrored RAM is actually used.
+
+    ADDR_LOW  = !A15 & !A14 & !A13 & !A12 & !A11 & !A10 & !A9 & !A8 ;
+    ADDR_HIGH = !A15 & !A14 & !A13 &  A12 & !A11 & !A10 ;
+    OUT_WRITE_ENABLE    = (ADDR_LOW # ADDR_HIGH) & VMA & (!RW) ;
+*/
+
+/*
+    Note that the Williams System 7 schematic incorrectly states
+    "A7" instead of A9 below. The physical board is wired for A9 though.
+*/
+
+INT_CHIP_ENABLE = !(!(A12 # A9) & A8) & (!(A13 # A14)) ;
+OUT_WRITE_ENABLE = INT_CHIP_ENABLE & VMA & (!RW) ;
+
+
+OUT_CLOCK = CLOCK ;
+OUT_A8 = A8;
+OUT_A9 = A9;

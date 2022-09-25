@@ -1,11 +1,11 @@
-{COMPONENT Z:\ADDRESSDECODE.SYM
+{COMPONENT X:\ADDRESS-DECODER\ADDRESSDECODE.SYM
 
  {ENVIRONMENT
   {PDIFvrev 3.00}
   {Program "CUPL(WM) Version 5.0a"}
   {DBtype "Schematic"}
   {DBvrev 1.01}
-  {DBtime "Sun Sep 18 17:28:37 2022 "}
+  {DBtime "Sat Sep 24 17:57:37 2022 "}
   {DBunit "MIL"}
   {DBgrid 10}
   {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
@@ -33,6 +33,7 @@
  {SYMBOL
   {PIN_DEF
    [Ly "PINCON"]
+   {P A7 {Pt "INPUT"}{Lq 0}{Ploc 100 240}}
    {P A8 {Pt "INPUT"}{Lq 0}{Ploc 100 220}}
    {P A9 {Pt "INPUT"}{Lq 0}{Ploc 100 200}}
    {P A10 {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
@@ -41,21 +42,23 @@
    {P A13 {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
    {P A14 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
    {P A15 {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
-   {P CLOCK {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
-   {P RW {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
-   {P VMA {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
-   {P CLOCK_OU {Pt "I/O"}{Lq 0}{Ploc 330 20}}
-   {P OUTPUT {Pt "I/O"}{Lq 0}{Ploc 330 40}}
-   {P A9_OUT {Pt "I/O"}{Lq 0}{Ploc 330 60}}
+   {P RW {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
+   {P VMA {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
+   {P CLOCK {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
+   {P OUT_CLOC {Pt "I/O"}{Lq 0}{Ploc 330 20}}
+   {P OUT_WRIT {Pt "I/O"}{Lq 0}{Ploc 330 40}}
+   {P OUT_A9 {Pt "I/O"}{Lq 0}{Ploc 330 60}}
+   {P OUT_A8 {Pt "I/O"}{Lq 0}{Ploc 330 80}}
   }
 
   {PKG
    [Ly "REFDES"]
    [Ts 25][Tj "CB"][Tr 0][Tm "N"]
-   {Rdl 215 250}
+   {Rdl 215 270}
 
    [Ly "PINNUM"]
    [Ts 15][Tj "RC"]
+   {Pnl 120 250}
    {Pnl 120 230}
    {Pnl 120 210}
    {Pnl 120 190}
@@ -71,14 +74,16 @@
    {Pnl 310 30}
    {Pnl 310 50}
    {Pnl 310 70}
+   {Pnl 310 90}
 
-   {Sd A 1 2 3 4 5 6 7 8 9 18 19 12 13 14}
+   {Sd A 1 2 3 4 5 6 7 8 9 17 18 19 12 13 14 15}
   }
 
   {PIC
    [Ly "GATE"]
    [Ts 15][Tj "LC"][Tr 0][Tm "N"]
-   {R 130 240 300 0}
+   {R 130 260 300 0}
+   {L 130 240 100 240}
    {L 130 220 100 220}
    {L 130 200 100 200}
    {L 130 180 100 180}
@@ -93,8 +98,10 @@
    {L 300 20 330 20}
    {L 300 40 330 40}
    {L 300 60 330 60}
+   {L 300 80 330 80}
    [Ly "PINNAM"]
    [Tj "LC"]
+   {T "A7" 140 240}
    {T "A8" 140 220}
    {T "A9" 140 200}
    {T "A10" 140 180}
@@ -103,13 +110,14 @@
    {T "A13" 140 120}
    {T "A14" 140 100}
    {T "A15" 140 80}
-   {T "CLOCK" 140 60}
-   {T "RW" 140 40}
-   {T "VMA" 140 20}
+   {T "RW" 140 60}
+   {T "VMA" 140 40}
+   {T "CLOCK" 140 20}
    [Tj "RC"]
-   {T "CLOCK_OU" 290 20}
-   {T "OUTPUT" 290 40}
-   {T "A9_OUT" 290 60}
+   {T "OUT_CLOC" 290 20}
+   {T "OUT_WRIT" 290 40}
+   {T "OUT_A9" 290 60}
+   {T "OUT_A8" 290 80}
    [Ly "DEVICE"]
    [Tj "CT"]
    {T "G16V8AS" 215 -10}
@@ -123,7 +131,7 @@
    {EX
     [Ly "ATTR2"]
     [Ts 12][Tj "CT"][Tr 0][Tm "N"]
-    {At PLD Z:\ADDRESSDECODE 215 240}
+    {At PLD X:\ADDRESS-DECODER\ADDRESSDECODE 215 260}
    }
   }
  }
@@ -133,6 +141,8 @@
   }
 
   {NET_DEF
+   {N A7
+   }
    {N A8
    }
    {N A9
@@ -149,17 +159,19 @@
    }
    {N A15
    }
-   {N CLOCK
-   }
    {N RW
    }
    {N VMA
    }
-   {N CLOCK_OU
+   {N CLOCK
    }
-   {N OUTPUT
+   {N OUT_CLOC
    }
-   {N A9_OUT
+   {N OUT_WRIT
+   }
+   {N OUT_A9
+   }
+   {N OUT_A8
    }
   }
 

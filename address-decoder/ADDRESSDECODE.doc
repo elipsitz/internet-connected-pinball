@@ -5,11 +5,11 @@
 
 CUPL(WM)        5.0a Serial# 60008009
 Device          g16v8as  Library DLIB-h-40-2
-Created         Sun Sep 18 17:28:37 2022
+Created         Sat Sep 24 17:57:37 2022
 Name            ADDRESSDECODE 
 Partno          00 
-Revision        00 
-Date            2022-09-18 
+Revision        01 
+Date            2022-09-24 
 Designer        Eli Lipsitz 
 Company         
 Assembly        
@@ -19,24 +19,24 @@ Location
                             Expanded Product Terms
 ===============================================================================
 
-A8_OUT =>
+INT_CHIP_ENABLE =>
+    !A8 & !A13 & !A14
+  # A12 & !A13 & !A14
+  # A9 & !A13 & !A14
+
+OUT_A8 =>
     A8
 
-A9_OUT =>
+OUT_A9 =>
     A9
 
-ADDR_HIGH =>
-    !A10 & !A11 & A12 & !A13 & !A14 & !A15
-
-ADDR_LOW =>
-    !A10 & !A8 & !A11 & !A12 & !A13 & !A14 & !A15 & !A9
-
-CLOCK_OUT =>
+OUT_CLOCK =>
     CLOCK
 
-OUTPUT =>
-    !A10 & !A11 & A12 & !A13 & !A14 & !A15 & !RW & VMA
-  # !A10 & !A8 & !A11 & !A13 & !A14 & !A15 & !A9 & !RW & VMA
+OUT_WRITE_ENABLE =>
+    !A8 & !A13 & !A14 & !RW & VMA
+  # A9 & !A13 & !A14 & !RW & VMA
+  # A12 & !A13 & !A14 & !RW & VMA
 
 
 ===============================================================================
@@ -47,24 +47,23 @@ Pin Variable                                    Pterms   Max     Min
 Pol   Name              Ext     Pin     Type     Used   Pterms  Level   
 --- --------            ---     ---     ----    ------  ------  -----   
 
-    A10                         3        V        -       -       -     
-    A10_OUT                     15       V        -       -       -     
-    A8                          1        V        -       -       -     
-    A11                         4        V        -       -       -     
-    A12                         5        V        -       -       -     
-    A13                         6        V        -       -       -     
-    A14                         7        V        -       -       -     
-    A15                         8        V        -       -       -     
-    A8_OUT                      0        I        1       -       -     
-    A9                          2        V        -       -       -     
-    A9_OUT                      14       V        1       8       2     
-    ADDR_HIGH                   0        I        1       -       -     
-    ADDR_LOW                    0        I        1       -       -     
-    CLOCK                       9        V        -       -       -     
-    CLOCK_OUT                   12       V        1       8       2     
-    OUTPUT                      13       V        2       8       2     
-    RW                          18       V        -       -       -     
-    VMA                         19       V        -       -       -     
+    A7                          1        V        -       -       -     
+    A8                          2        V        -       -       -     
+    A9                          3        V        -       -       -     
+    A10                         4        V        -       -       -     
+    A11                         5        V        -       -       -     
+    A12                         6        V        -       -       -     
+    A13                         7        V        -       -       -     
+    A14                         8        V        -       -       -     
+    A15                         9        V        -       -       -     
+    CLOCK                       19       V        -       -       -     
+    INT_CHIP_ENABLE             0        I        3       -       -     
+    OUT_A8                      15       V        1       8       2     
+    OUT_A9                      14       V        1       8       2     
+    OUT_CLOCK                   12       V        1       8       2     
+    OUT_WRITE_ENABLE            13       V        3       8       2     
+    RW                          17       V        -       -       -     
+    VMA                         18       V        -       -       -     
 
 
 LEGEND    D : default variable         F : field      G : group
@@ -115,8 +114,8 @@ Pin #16  02051  Pol x  02123  Ac1 -
  00928 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  00960 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  00992 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
-Pin #15  02052  Pol x  02124  Ac1 - 
- 01024 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+Pin #15  02052  Pol -  02124  Ac1 x 
+ 01024 x------------------------------- 
  01056 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01088 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01120 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
@@ -125,7 +124,7 @@ Pin #15  02052  Pol x  02124  Ac1 -
  01216 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01248 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
 Pin #14  02053  Pol -  02125  Ac1 x 
- 01280 x------------------------------- 
+ 01280 ----x--------------------------- 
  01312 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01344 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01376 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
@@ -134,16 +133,16 @@ Pin #14  02053  Pol -  02125  Ac1 x
  01472 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01504 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
 Pin #13  02054  Pol -  02126  Ac1 x 
- 01536 -----xx--x-xx----x---x---x------ 
- 01568 -x-x-xx--x-x-----x---x---x------ 
- 01600 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+ 01536 -x--------x----x-----x---x------ 
+ 01568 ----x-----x----x-----x---x------ 
+ 01600 ----------x----xx----x---x------ 
  01632 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01664 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01696 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01728 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01760 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
 Pin #12  02055  Pol -  02127  Ac1 x 
- 01792 ----------------------------x--- 
+ 01792 ------x------------------------- 
  01824 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01856 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01888 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
@@ -162,15 +161,15 @@ LEGEND    X : fuse not blown
 
                                ______________
                               |ADDRESSDECODE |
-                       A8 x---|1           20|---x Vcc                      
-                       A9 x---|2           19|---x VMA                      
-                      A10 x---|3           18|---x RW                       
-                      A11 x---|4           17|---x                          
-                      A12 x---|5           16|---x                          
-                      A13 x---|6           15|---x A10_OUT                  
-                      A14 x---|7           14|---x A9_OUT                   
-                      A15 x---|8           13|---x OUTPUT                   
-                    CLOCK x---|9           12|---x CLOCK_OUT                
+                       A7 x---|1           20|---x Vcc                      
+                       A8 x---|2           19|---x CLOCK                    
+                       A9 x---|3           18|---x VMA                      
+                      A10 x---|4           17|---x RW                       
+                      A11 x---|5           16|---x                          
+                      A12 x---|6           15|---x OUT_A8                   
+                      A13 x---|7           14|---x OUT_A9                   
+                      A14 x---|8           13|---x OUT_WRITE_ENABLE         
+                      A15 x---|9           12|---x OUT_CLOCK                
                       GND x---|10          11|---x                          
                               |______________|
 
