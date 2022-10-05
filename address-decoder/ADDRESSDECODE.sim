@@ -8,10 +8,11 @@ PIN   6 =  A12
 PIN   7 =  A13 
 PIN   8 =  A14 
 PIN   9 =  A15 
-PIN  19 =  CLOCK 
+PIN  16 =  CLK 
+PIN  11 = !OE 
 PIN  15 =  OUT_A8 
 PIN  14 =  OUT_A9 
-PIN  12 =  OUT_CLOCK 
+PIN  12 =  OUT_CLK 
 PIN  13 =  OUT_WRITE_ENABLE 
 PIN  17 =  RW 
 PIN  18 =  VMA 
@@ -29,15 +30,36 @@ INT_CHIP_ENABLE =>
 OUT_A8 =>
     A8
 
+OUT_A8.oe  =>
+    !OE
+
 OUT_A9 =>
     A9
 
-OUT_CLOCK =>
-    CLOCK
+OUT_A9.oe  =>
+    !OE
+
+OUT_CLK =>
+    CLK
+
+OUT_CLK.oe  =>
+    !OE
 
 OUT_WRITE_ENABLE =>
     !A8 & !A13 & !A14 & !RW & VMA
   # A9 & !A13 & !A14 & !RW & VMA
   # A12 & !A13 & !A14 & !RW & VMA
+
+OUT_WRITE_ENABLE.oe  =>
+    !OE
+
+CLK.oe  =>
+    0 
+
+RW.oe  =>
+    0 
+
+VMA.oe  =>
+    0 
 
 %END

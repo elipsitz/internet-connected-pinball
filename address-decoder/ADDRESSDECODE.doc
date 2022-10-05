@@ -4,12 +4,12 @@
 *******************************************************************************
 
 CUPL(WM)        5.0a Serial# 60008009
-Device          g16v8as  Library DLIB-h-40-2
-Created         Sat Sep 24 17:57:37 2022
+Device          g16v8ma  Library DLIB-h-40-8
+Created         Tue Oct 04 21:54:59 2022
 Name            ADDRESSDECODE 
 Partno          00 
 Revision        01 
-Date            2022-09-24 
+Date            2022-10-04 
 Designer        Eli Lipsitz 
 Company         
 Assembly        
@@ -27,16 +27,37 @@ INT_CHIP_ENABLE =>
 OUT_A8 =>
     A8
 
+OUT_A8.oe  =>
+    OE
+
 OUT_A9 =>
     A9
 
-OUT_CLOCK =>
-    CLOCK
+OUT_A9.oe  =>
+    OE
+
+OUT_CLK =>
+    CLK
+
+OUT_CLK.oe  =>
+    OE
 
 OUT_WRITE_ENABLE =>
     !A8 & !A13 & !A14 & !RW & VMA
   # A9 & !A13 & !A14 & !RW & VMA
   # A12 & !A13 & !A14 & !RW & VMA
+
+OUT_WRITE_ENABLE.oe  =>
+    OE
+
+CLK.oe  =>
+    0 
+
+RW.oe  =>
+    0 
+
+VMA.oe  =>
+    0 
 
 
 ===============================================================================
@@ -56,14 +77,22 @@ Pol   Name              Ext     Pin     Type     Used   Pterms  Level
     A13                         7        V        -       -       -     
     A14                         8        V        -       -       -     
     A15                         9        V        -       -       -     
-    CLOCK                       19       V        -       -       -     
+    CLK                         16       V        -       -       -     
     INT_CHIP_ENABLE             0        I        3       -       -     
-    OUT_A8                      15       V        1       8       2     
-    OUT_A9                      14       V        1       8       2     
-    OUT_CLOCK                   12       V        1       8       2     
-    OUT_WRITE_ENABLE            13       V        3       8       2     
+ !  OE                          11       V        -       -       -     
+    OUT_A8                      15       V        1       7       2     
+    OUT_A8              oe      15       X        1       1       1     
+    OUT_A9                      14       V        1       7       2     
+    OUT_A9              oe      14       X        1       1       1     
+    OUT_CLK                     12       V        1       7       2     
+    OUT_CLK             oe      12       X        1       1       1     
+    OUT_WRITE_ENABLE            13       V        3       7       2     
+    OUT_WRITE_ENABLE    oe      13       X        1       1       1     
     RW                          17       V        -       -       -     
     VMA                         18       V        -       -       -     
+    CLK                 oe      16       D        1       1       0     
+    RW                  oe      17       D        1       1       0     
+    VMA                 oe      18       D        1       1       0     
 
 
 LEGEND    D : default variable         F : field      G : group
@@ -76,7 +105,7 @@ LEGEND    D : default variable         F : field      G : group
                                    Fuse Plot
 ===============================================================================
 
-Syn   02192 - Ac0   02193 x 
+Syn   02192 - Ac0   02193 - 
 
 Pin #19  02048  Pol x  02120  Ac1 - 
  00000 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
@@ -114,36 +143,36 @@ Pin #16  02051  Pol x  02123  Ac1 -
  00928 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  00960 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  00992 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
-Pin #15  02052  Pol -  02124  Ac1 x 
- 01024 x------------------------------- 
- 01056 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+Pin #15  02052  Pol -  02124  Ac1 - 
+ 01024 -------------------------------x 
+ 01056 x------------------------------- 
  01088 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01120 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01152 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01184 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01216 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01248 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
-Pin #14  02053  Pol -  02125  Ac1 x 
- 01280 ----x--------------------------- 
- 01312 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+Pin #14  02053  Pol -  02125  Ac1 - 
+ 01280 -------------------------------x 
+ 01312 ----x--------------------------- 
  01344 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01376 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01408 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01440 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01472 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01504 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
-Pin #13  02054  Pol -  02126  Ac1 x 
- 01536 -x--------x----x-----x---x------ 
- 01568 ----x-----x----x-----x---x------ 
- 01600 ----------x----xx----x---x------ 
- 01632 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+Pin #13  02054  Pol -  02126  Ac1 - 
+ 01536 -------------------------------x 
+ 01568 -x----x----x---------x---x------ 
+ 01600 ----x-x----x---------x---x------ 
+ 01632 ------x----x----x----x---x------ 
  01664 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01696 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01728 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01760 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
-Pin #12  02055  Pol -  02127  Ac1 x 
- 01792 ------x------------------------- 
- 01824 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+Pin #12  02055  Pol -  02127  Ac1 - 
+ 01792 -------------------------------x 
+ 01824 --------------x----------------- 
  01856 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01888 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
  01920 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
@@ -162,14 +191,14 @@ LEGEND    X : fuse not blown
                                ______________
                               |ADDRESSDECODE |
                        A7 x---|1           20|---x Vcc                      
-                       A8 x---|2           19|---x CLOCK                    
+                       A8 x---|2           19|---x                          
                        A9 x---|3           18|---x VMA                      
                       A10 x---|4           17|---x RW                       
-                      A11 x---|5           16|---x                          
+                      A11 x---|5           16|---x CLK                      
                       A12 x---|6           15|---x OUT_A8                   
                       A13 x---|7           14|---x OUT_A9                   
                       A14 x---|8           13|---x OUT_WRITE_ENABLE         
-                      A15 x---|9           12|---x OUT_CLOCK                
-                      GND x---|10          11|---x                          
+                      A15 x---|9           12|---x OUT_CLK                  
+                      GND x---|10          11|---x !OE                      
                               |______________|
 
