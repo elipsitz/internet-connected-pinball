@@ -5,7 +5,7 @@
   {Program "CUPL(WM) Version 5.0a"}
   {DBtype "Schematic"}
   {DBvrev 1.01}
-  {DBtime "Tue Oct 04 21:54:59 2022 "}
+  {DBtime "Wed Oct 05 17:29:34 2022 "}
   {DBunit "MIL"}
   {DBgrid 10}
   {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
@@ -33,22 +33,22 @@
  {SYMBOL
   {PIN_DEF
    [Ly "PINCON"]
-   {P A7 {Pt "INPUT"}{Lq 0}{Ploc 100 260}}
-   {P A8 {Pt "INPUT"}{Lq 0}{Ploc 100 240}}
-   {P A9 {Pt "INPUT"}{Lq 0}{Ploc 100 220}}
-   {P A10 {Pt "INPUT"}{Lq 0}{Ploc 100 200}}
-   {P A11 {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
-   {P A12 {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
-   {P A13 {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
-   {P A14 {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
-   {P A15 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
+   {P A15 {Pt "INPUT"}{Lq 0}{Ploc 100 260}}
+   {P A14 {Pt "INPUT"}{Lq 0}{Ploc 100 240}}
+   {P A12 {Pt "INPUT"}{Lq 0}{Ploc 100 220}}
+   {P A13 {Pt "INPUT"}{Lq 0}{Ploc 100 200}}
+   {P A10 {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
+   {P A11 {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
+   {P A8 {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
+   {P A9 {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
+   {P A7 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
    {P OE' {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
    {P CLK {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
    {P RW {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
    {P VMA {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
-   {P OUT_CLK {Pt "I/O"}{Lq 0}{Ploc 310 20}}
-   {P OUT_WRIT {Pt "I/O"}{Lq 0}{Ploc 310 40}}
-   {P OUT_A9 {Pt "I/O"}{Lq 0}{Ploc 310 60}}
+   {P OUT_WRIT {Pt "I/O"}{Lq 0}{Ploc 310 20}}
+   {P OUT_A9 {Pt "I/O"}{Lq 0}{Ploc 310 40}}
+   {P OUT_CLK {Pt "I/O"}{Lq 0}{Ploc 310 60}}
    {P OUT_A8 {Pt "I/O"}{Lq 0}{Ploc 310 80}}
   }
 
@@ -105,23 +105,23 @@
    {L 280 80 310 80}
    [Ly "PINNAM"]
    [Tj "LC"]
-   {T "A7" 140 260}
-   {T "A8" 140 240}
-   {T "A9" 140 220}
-   {T "A10" 140 200}
-   {T "A11" 140 180}
-   {T "A12" 140 160}
-   {T "A13" 140 140}
-   {T "A14" 140 120}
-   {T "A15" 140 100}
+   {T "A15" 140 260}
+   {T "A14" 140 240}
+   {T "A12" 140 220}
+   {T "A13" 140 200}
+   {T "A10" 140 180}
+   {T "A11" 140 160}
+   {T "A8" 140 140}
+   {T "A9" 140 120}
+   {T "A7" 140 100}
    {T "OE'" 140 80}
    {T "CLK" 140 60}
    {T "RW" 140 40}
    {T "VMA" 140 20}
    [Tj "RC"]
-   {T "OUT_CLK" 270 20}
-   {T "OUT_WRIT" 270 40}
-   {T "OUT_A9" 270 60}
+   {T "OUT_WRIT" 270 20}
+   {T "OUT_A9" 270 40}
+   {T "OUT_CLK" 270 60}
    {T "OUT_A8" 270 80}
    [Ly "DEVICE"]
    [Tj "CT"]
@@ -146,23 +146,23 @@
   }
 
   {NET_DEF
-   {N A7
+   {N A15
    }
-   {N A8
-   }
-   {N A9
-   }
-   {N A10
-   }
-   {N A11
+   {N A14
    }
    {N A12
    }
    {N A13
    }
-   {N A14
+   {N A10
    }
-   {N A15
+   {N A11
+   }
+   {N A8
+   }
+   {N A9
+   }
+   {N A7
    }
    {N OE'
    }
@@ -172,11 +172,11 @@
    }
    {N VMA
    }
-   {N OUT_CLK
-   }
    {N OUT_WRIT
    }
    {N OUT_A9
+   }
+   {N OUT_CLK
    }
    {N OUT_A8
    }

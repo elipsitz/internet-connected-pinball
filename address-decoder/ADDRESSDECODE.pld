@@ -10,16 +10,16 @@ Device   G16V8 ;
 
 
 /* *************** INPUT PINS ******************** */
-PIN [9,8,7,6,5,4,3,2,1] = [A15..7] ;      /* Address pins                   */
+PIN [1,2,3,4,5,6,7,8,9] = [A15, A14, A12, A13, A10, A11, A8, A9, A7] ;   /* Address pins                   */
 PIN 18 = VMA ;                            /* Valid memory address           */ 
 PIN 17 = RW ;                             /* Read (high) / Write (low)      */ 
 PIN 16 = CLK ;                            /* Clock (to pass through)        */ 
 PIN 11 = !OE  ;
  
 /* *************** OUTPUT PINS ******************** */
-PIN 12 = OUT_CLK ;                        /* Clock signal, passed through */
-PIN 13 = OUT_WRITE_ENABLE ;               /* Output, "is it writing?" */
-PIN 14 = OUT_A9 ;                         /* A9, passed through */
+PIN 12 = OUT_WRITE_ENABLE ;               /* Output, "is it writing?" */
+PIN 13 = OUT_A9 ;                         /* A9, passed through */
+PIN 14 = OUT_CLK ;                        /* Clock signal, passed through */
 PIN 15 = OUT_A8 ;                         /* A8, passed through */
 
 /* *************** LOGIC       ******************** */
