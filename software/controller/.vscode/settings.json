@@ -3,6 +3,7 @@
         "freertos.h": "c",
         "gpio.h": "c",
         "esp_attr.h": "c",
-        "bus_observer.h": "c"
+        "bus_observer.h": "c",
+        "task.h": "c"
     }
 }

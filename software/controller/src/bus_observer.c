@@ -18,27 +18,27 @@ typedef struct {
     uint32_t value;
 } reg1_t;
 
-static inline reg0_t
+static inline reg0_t IRAM_ATTR
 read_reg0(void) {
     return (reg0_t) { REG_READ(GPIO_IN_REG) };
 }
 
-static inline reg1_t
+static inline reg1_t IRAM_ATTR
 read_reg1(void) {
     return (reg1_t) { REG_READ(GPIO_IN1_REG) };
 }
 
-static inline bool
+static inline bool IRAM_ATTR
 get_clock(reg1_t reg1) {
     return reg1.value & (1 << 7);
 }
 
-static inline bool
+static inline bool IRAM_ATTR
 get_wren(reg0_t reg0) {
     return reg0.value & (1 << 5);
 }
 
-static inline uint16_t
+static inline uint16_t IRAM_ATTR
 get_address(reg0_t reg0, reg1_t reg1) {
     return
         ((reg0.value >> (23 - 0))      & 0b0000000011) |  // A0, A1
@@ -46,7 +46,7 @@ get_address(reg0_t reg0, reg1_t reg1) {
         ((reg1.value << 5 /* 0 - 5 */) & 0b1111100000); // A5, A6, A7, A8, A9
 }
 
-static inline uint8_t
+static inline uint8_t IRAM_ATTR
 get_data(reg0_t reg0) {
     return
         ((reg0.value >> (13 - 0)) & 0b01111111) |  // D0, D1, D2, D3, D4, D5, D6
@@ -77,7 +77,8 @@ get_data(reg0_t reg0) {
 /// D6   -> 19
 /// D7   -> 21
 
-static void wait_for_clock(reg1_t* reg1, bool value) {
+static inline void IRAM_ATTR
+wait_for_clock(reg1_t* reg1, bool value) {
     while (true) {
         *reg1 = read_reg1();
         if (get_clock(*reg1) == value) {
@@ -151,6 +152,7 @@ int bus_observer_start(bus_observer_t *observer)
         &observer->task_handle,
         1  // Core 1
     );
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
     if (result == pdPASS) {
         return 0;
