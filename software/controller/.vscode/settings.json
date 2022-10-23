@@ -4,6 +4,11 @@
         "gpio.h": "c",
         "esp_attr.h": "c",
         "bus_observer.h": "c",
-        "task.h": "c"
+        "task.h": "c",
+        "*.ipp": "c",
+        "functional": "c",
+        "nvs_flash.h": "c",
+        "esp_wifi.h": "c",
+        "esp_log.h": "c"
     }
 }

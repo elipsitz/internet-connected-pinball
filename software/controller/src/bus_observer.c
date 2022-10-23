@@ -143,7 +143,7 @@ int bus_observer_start(bus_observer_t *observer)
     gpio_set_level(GPIO_OE, false);
 
     // Create the task.
-    int result = xTaskCreatePinnedToCore(
+    /*int result = xTaskCreatePinnedToCore(
         bus_observer_task,
         "Bus Observer",
         STACK_SIZE, // Stack size in bytes, not words.
@@ -158,5 +158,6 @@ int bus_observer_start(bus_observer_t *observer)
         return 0;
     } else {
         return -1;
-    }
+    }*/
+    return 0;
 }
