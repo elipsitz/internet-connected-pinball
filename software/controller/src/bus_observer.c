@@ -1,15 +1,12 @@
 #include <driver/gpio.h>
 #include <esp_attr.h>
 #include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 
 #include "bare_metal_app_cpu.h"
 #include "bus_observer.h"
 
 /// GPIO controlling ~OE.
 #define GPIO_OE  GPIO_NUM_4
-
-#define STACK_SIZE (1024) // Bytes
 
 typedef struct {
     uint32_t value;
@@ -88,12 +85,14 @@ wait_for_clock(reg1_t* reg1, bool value) {
     }
 }
 
+static DRAM_ATTR char app_cpu_init_log[] = "Running bus observer on app cpu!\n";
+
 static void IRAM_ATTR
 bus_observer_task(void *context)
 {
-    bus_observer_t *observer = context;
+    ets_printf(app_cpu_init_log);
 
-    portDISABLE_INTERRUPTS();
+    bus_observer_t *observer = context;
 
     reg0_t reg0;
     reg1_t reg1;
@@ -127,17 +126,6 @@ bus_observer_task(void *context)
     }
 }
 
-static DRAM_ATTR char app_cpu_init_log[] = "Running on the app cpu!\n";
-
-static void IRAM_ATTR app_cpu_main()
-{
-    while (1)
-    {
-        ets_printf(app_cpu_init_log);
-        ets_delay_us(10000000);
-    }
-}
-
 /// Start the bus observer.
 int bus_observer_start(bus_observer_t *observer)
 {
@@ -154,26 +142,11 @@ int bus_observer_start(bus_observer_t *observer)
     gpio_set_direction(GPIO_OE, GPIO_MODE_OUTPUT);
     gpio_set_level(GPIO_OE, false);
 
-    if (!start_app_cpu(app_cpu_main)) {
+    // Start up the second cpu.
+    if (!start_app_cpu(bus_observer_task, (void*)observer)) {
         return -1;
     }
-
-    // Create the task.
-    /*int result = xTaskCreatePinnedToCore(
-        bus_observer_task,
-        "Bus Observer",
-        STACK_SIZE, // Stack size in bytes, not words.
-        (void *)observer,
-        2, // Priority
-        &observer->task_handle,
-        1  // Core 1
-    );
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
-    if (result == pdPASS) {
-        return 0;
-    } else {
-        return -1;
-    }*/
     return 0;
 }

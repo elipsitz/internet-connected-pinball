@@ -1,7 +1,7 @@
 #pragma once
 
 /// The type of the app cpu main function.
-typedef void (*app_cpu_main_fn_t)(void);
+typedef void (*app_cpu_main_fn_t)(void* context);
 
 /// Start the app cpu with the given main function.
 ///
@@ -9,4 +9,4 @@ typedef void (*app_cpu_main_fn_t)(void);
 /// in IRAM/DRAM.
 ///
 /// Returns true if succesful.
-bool start_app_cpu(app_cpu_main_fn_t main_fn);
+bool start_app_cpu(app_cpu_main_fn_t main_fn, void* context);

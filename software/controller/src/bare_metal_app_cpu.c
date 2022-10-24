@@ -68,11 +68,13 @@ SOC_RESERVE_MEMORY_REGION(0x3ffe3f20, 0x3ffe4350, rom_app_data);
 #endif
 
 static atomic_uintptr_t app_cpu_main_fn_ptr = (uintptr_t)NULL;
+static atomic_uintptr_t app_cpu_main_context = (uintptr_t)NULL;
 
 static void IRAM_ATTR app_cpu_main_trampoline()
 {
     app_cpu_main_fn_t main_fn = (app_cpu_main_fn_t)app_cpu_main_fn_ptr;
-    main_fn();
+    void* context = (void*)app_cpu_main_context;
+    main_fn(context);
 }
 
 // The main MUST NOT be inlined!
@@ -149,7 +151,7 @@ static void IRAM_ATTR app_cpu_init()
     }
 }
 
-bool start_app_cpu(app_cpu_main_fn_t main_fn)
+bool start_app_cpu(app_cpu_main_fn_t main_fn, void* context)
 {
 #if BAREMETAL_APP_CPU_DEBUG
     // printf("App main at %08X\n", (uint32_t)&app_cpu_main);
@@ -173,6 +175,7 @@ bool start_app_cpu(app_cpu_main_fn_t main_fn)
     }
 
     app_cpu_main_fn_ptr = (uintptr_t)main_fn;
+    app_cpu_main_context = (void*)context;
 
     if (!app_cpu_stack_ptr)
     {

@@ -8,9 +8,6 @@
 typedef struct {
     // The memory.
     uint8_t memory[1024];
-
-    // The task handle for the bus observer.
-    TaskHandle_t task_handle;
 } bus_observer_t;
 
 /// Start the bus observer.
