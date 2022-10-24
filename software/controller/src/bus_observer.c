@@ -3,6 +3,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#include "bare_metal_app_cpu.h"
 #include "bus_observer.h"
 
 /// GPIO controlling ~OE.
@@ -126,6 +127,17 @@ bus_observer_task(void *context)
     }
 }
 
+static DRAM_ATTR char app_cpu_init_log[] = "Running on the app cpu!\n";
+
+static void IRAM_ATTR app_cpu_main()
+{
+    while (1)
+    {
+        ets_printf(app_cpu_init_log);
+        ets_delay_us(10000000);
+    }
+}
+
 /// Start the bus observer.
 int bus_observer_start(bus_observer_t *observer)
 {
@@ -141,6 +153,10 @@ int bus_observer_start(bus_observer_t *observer)
     gpio_reset_pin(GPIO_OE);
     gpio_set_direction(GPIO_OE, GPIO_MODE_OUTPUT);
     gpio_set_level(GPIO_OE, false);
+
+    if (!start_app_cpu(app_cpu_main)) {
+        return -1;
+    }
 
     // Create the task.
     /*int result = xTaskCreatePinnedToCore(

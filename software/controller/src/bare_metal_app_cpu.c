@@ -25,6 +25,7 @@
 // Adapted from https://github.com/Winkelkatze/ESP32-Bare-Metal-AppCPU
 // And https://github.com/darthcloud/esp32_baremetal_core1_bitbang_test
 
+#include <stdatomic.h>
 #include <esp_attr.h>
 #include <esp_log.h>
 #include <soc/dport_reg.h>
@@ -38,6 +39,8 @@
 #include <xtensa/xtensa_api.h>
 #include <stdio.h>
 #include "esp32/rom/cache.h"
+
+#include "bare_metal_app_cpu.h"
 
 #define TAG "bare_metal"
 
@@ -64,30 +67,18 @@ static volatile uint8_t app_cpu_initial_start;
 SOC_RESERVE_MEMORY_REGION(0x3ffe3f20, 0x3ffe4350, rom_app_data);
 #endif
 
-#ifdef APP_CPU_RESERVE_ROM_DATA
-// Can't load from flash, therefore the string needs to be placed in the RAM
-static char hello_world[] = "Hello World!\n";
-#endif
+static atomic_uintptr_t app_cpu_main_fn_ptr = (uintptr_t)NULL;
 
-// APP CPU cache is part of the main memory pool and we can't get the caches to work easily anyway because cache loads need to be synchronized.
-// So for now the app core can only execute from IRAM (and internal ROM).
-// Also, the APP CPU CANNOT load data from the flash!
-static void IRAM_ATTR app_cpu_main()
+static void IRAM_ATTR app_cpu_main_trampoline()
 {
-    while (1)
-    {
-        // User code goes here
-#ifdef APP_CPU_RESERVE_ROM_DATA
-        ets_printf(hello_world); // Do not specify a "Hello World" here, as this would be stored in the flash!
-#endif
-        ets_delay_us(1000000);
-    }
+    app_cpu_main_fn_t main_fn = (app_cpu_main_fn_t)app_cpu_main_fn_ptr;
+    main_fn();
 }
 
 // The main MUST NOT be inlined!
 // Otherwise, it will cause mayhem on the stack since we are modifying the stack pointer before the main is called.
 // Having a volatile pointer around should force the compiler to behave.
-static void (*volatile app_cpu_main_ptr)() = &app_cpu_main;
+static void (*volatile app_cpu_main_ptr)() = &app_cpu_main_trampoline;
 
 static inline void cpu_write_dtlb(uint32_t vpn, unsigned attr)
 {
@@ -154,14 +145,14 @@ static void IRAM_ATTR app_cpu_init()
 
         // Finally call the main.
         // Its imperative for the main to be NOT INLINED!
-        app_cpu_main();
+        (app_cpu_main_trampoline)();
     }
 }
 
-bool start_app_cpu()
+bool start_app_cpu(app_cpu_main_fn_t main_fn)
 {
 #if BAREMETAL_APP_CPU_DEBUG
-    printf("App main at %08X\n", (uint32_t)&app_cpu_main);
+    // printf("App main at %08X\n", (uint32_t)&app_cpu_main);
     printf("App init at %08X\n", (uint32_t)&app_cpu_init);
     printf("APP_CPU RESET: %u\n", DPORT_READ_PERI_REG(DPORT_APPCPU_CTRL_A_REG));
     printf("APP_CPU CLKGATE: %u\n", DPORT_READ_PERI_REG(DPORT_APPCPU_CTRL_B_REG));
@@ -180,6 +171,8 @@ bool start_app_cpu()
         printf("APP CPU is already running!\n");
         return false;
     }
+
+    app_cpu_main_fn_ptr = (uintptr_t)main_fn;
 
     if (!app_cpu_stack_ptr)
     {
