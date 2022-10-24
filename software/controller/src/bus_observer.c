@@ -122,13 +122,18 @@ bus_observer_task(void *context)
         uint8_t data = get_data(reg0);
 
         // Save it, and do some sort of sync?
-        observer->memory[address] = data;
+        atomic_store_explicit(&observer->memory[address], data, memory_order_relaxed);
     }
 }
 
 /// Start the bus observer.
 int bus_observer_start(bus_observer_t *observer)
 {
+    // Initialize bus observer struct.
+    for (size_t i = 0; i < sizeof(observer->memory); i += 1) {
+        observer->memory[i] = 0xFF;
+    }
+
     // Initialize all of the GPIO pins.
     int gpios[] = {5, 39, 22, 23, 25, 26, 27, 32, 33, 34, 35, 36, 13, 14, 15, 16, 17, 18, 19, 21};
     int num_gpios = sizeof(gpios) / sizeof(gpios[0]);

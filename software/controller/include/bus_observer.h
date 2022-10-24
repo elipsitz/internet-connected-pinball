@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdatomic.h>
 #include <stdint.h>
 
 #include <freertos/FreeRTOS.h>

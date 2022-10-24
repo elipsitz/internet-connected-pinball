@@ -15,16 +15,11 @@ static const char* TAG = "main";
 static bus_observer_t DRAM_ATTR bus_observer;
 
 void
-app_main() {
+app_main(void) {
     ESP_LOGI(TAG, "Initializing");
-    gpio_reset_pin(GPIO_LED);
-    gpio_set_direction(GPIO_LED, GPIO_MODE_OUTPUT);
-    gpio_set_level(GPIO_LED, true);
-
-    // Initialize NVS and WiFi (before bus observer disables interrupts).
-    nvs_flash_init();
-    wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
-    esp_wifi_init(&wifi_init_config);
+    ESP_ERROR_CHECK(gpio_reset_pin(GPIO_LED));
+    ESP_ERROR_CHECK(gpio_set_direction(GPIO_LED, GPIO_MODE_OUTPUT));
+    ESP_ERROR_CHECK(gpio_set_level(GPIO_LED, true));
 
     // Start the bus observer.
     ESP_LOGI(TAG, "Starting bus observer.");
@@ -34,11 +29,14 @@ app_main() {
     }
 
     // Start WiFi.
-    esp_wifi_set_mode(WIFI_MODE_AP);
-    esp_wifi_start();
+    ESP_ERROR_CHECK(nvs_flash_init());
+    wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+    ESP_ERROR_CHECK(esp_wifi_start());
     
     // Initialization complete, turn off LED.
-    gpio_set_level(GPIO_LED, false);
+    ESP_ERROR_CHECK(gpio_set_level(GPIO_LED, false));
     ESP_LOGI(TAG, "Initialization complete");
 
     while (1) {
