@@ -1,11 +1,13 @@
 #include <driver/gpio.h>
+#include <esp_event.h>
 #include <esp_log.h>
-#include <esp_wifi.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <nvs_flash.h>
 
 #include "bus_observer.h"
+#include "wifi.h"
+#include "ui.h"
 
 // GPIO with the built-in LED.
 #define GPIO_LED GPIO_NUM_2
@@ -28,12 +30,21 @@ app_main(void) {
         ESP_LOGE(TAG, "Error initializing bus observer");
     }
 
-    // Start WiFi.
-    ESP_ERROR_CHECK(nvs_flash_init());
-    wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
-    ESP_ERROR_CHECK(esp_wifi_start());
+    // Initialize non-volatile storage.
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    // Start wifi and web UI.
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    wifi_init();
+    ui_init(&bus_observer);
+
+    // TODO set up memory poller / HTTP uploader.
+    // TODO enable OTA.
     
     // Initialization complete, turn off LED.
     ESP_ERROR_CHECK(gpio_set_level(GPIO_LED, false));

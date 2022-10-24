@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include <driver/gpio.h>
 #include <esp_attr.h>
 #include <freertos/FreeRTOS.h>
@@ -130,9 +132,7 @@ bus_observer_task(void *context)
 int bus_observer_start(bus_observer_t *observer)
 {
     // Initialize bus observer struct.
-    for (size_t i = 0; i < sizeof(observer->memory); i += 1) {
-        observer->memory[i] = 0xFF;
-    }
+    memset(observer->memory, 0xFF, PINBALL_MEMORY_LEN);
 
     // Initialize all of the GPIO pins.
     int gpios[] = {5, 39, 22, 23, 25, 26, 27, 32, 33, 34, 35, 36, 13, 14, 15, 16, 17, 18, 19, 21};

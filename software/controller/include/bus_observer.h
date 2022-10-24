@@ -6,9 +6,11 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#define PINBALL_MEMORY_LEN (1024)
+
 typedef struct {
     // The memory.
-    uint8_t memory[1024];
+    uint8_t memory[PINBALL_MEMORY_LEN];
 } bus_observer_t;
 
 /// Start the bus observer.

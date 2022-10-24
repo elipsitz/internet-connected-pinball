@@ -175,7 +175,7 @@ bool start_app_cpu(app_cpu_main_fn_t main_fn, void* context)
     }
 
     app_cpu_main_fn_ptr = (uintptr_t)main_fn;
-    app_cpu_main_context = (void*)context;
+    app_cpu_main_context = (uintptr_t)context;
 
     if (!app_cpu_stack_ptr)
     {

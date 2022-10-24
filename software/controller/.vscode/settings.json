@@ -10,6 +10,7 @@
         "nvs_flash.h": "c",
         "esp_wifi.h": "c",
         "esp_log.h": "c",
-        "bare_metal_app_cpu.h": "c"
+        "bare_metal_app_cpu.h": "c",
+        "esp_http_server.h": "c"
     }
 }
