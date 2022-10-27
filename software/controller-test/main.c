@@ -7,32 +7,44 @@
 
 #include "bus.pio.h"
 
-/*
-    26 available GPIO pins
+#define PIN_ADDR_START (0)
+#define PIN_CLK (20)
+#define PIN_VMA (21)
 
-    1 clock
-    1 VMA
-    (assume read/write is always 'write')
+static inline void do_write(PIO pio, uint sm, uint16_t addr, uint8_t data)
+{
+    uint32_t word = (((uint32_t)data) << 24) | (((uint32_t)addr) << 12) | ((uint32_t)addr);
+    pio_sm_put_blocking(pio, sm, word);
+}
 
-    8 data
-
-    at least 11 for address. Ideally 13 or 14.
-
- */
-
-int main() {
-    set_sys_clock_khz(120000, true); // Clock at 120MHz
+int main()
+{
+    // Clock at 120MHz
+    set_sys_clock_khz(120000, true);
     stdio_init_all();
 
+    // Initialize PIO output.
     PIO pio = pio0;
     uint offset = pio_add_program(pio, &bus_program);
     uint sm = pio_claim_unused_sm(pio, true);
-    bus_program_init(pio, sm, offset, PICO_DEFAULT_LED_PIN);
+    bus_program_init(pio, sm, offset, PIN_CLK, PIN_VMA, PIN_ADDR_START);
 
-    sleep_ms(2000);
-    pio_sm_put_blocking(pio, sm, 10000000);
+    sleep_ms(1000);
 
-    while (true) {
+    gpio_init(PICO_DEFAULT_LED_PIN);
+    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+    gpio_put(PICO_DEFAULT_LED_PIN, 1);
+
+    for (uint i = 0; i < 1024; i++) {
+        uint16_t addr = (uint16_t)i;
+        // addr |= (1 << 11); // Make it out of the range.
+        addr |= (1 << 10); // Make put it in the secondary range.
+        do_write(pio, sm, addr, i & 0xFF);
+    }
+    
+    gpio_put(PICO_DEFAULT_LED_PIN, 0);
+
+    while (1) {
         sleep_ms(1000);
     }
 }

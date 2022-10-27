@@ -41,7 +41,7 @@ get_wren(reg0_t reg0) {
 static inline uint16_t IRAM_ATTR
 get_address(reg0_t reg0, reg1_t reg1) {
     return
-        ((reg0.value >> (23 - 0))      & 0b0000000011) |  // A0, A1
+        ((reg0.value >> (22 - 0))      & 0b0000000011) |  // A0, A1
         ((reg0.value >> (25 - 2))      & 0b0000011100) | // A2, A3, A4
         ((reg1.value << 5 /* 0 - 5 */) & 0b1111100000); // A5, A6, A7, A8, A9
 }
@@ -92,8 +92,6 @@ bus_observer_task(void *context)
         while (!get_clock(read_reg1()))
             ;
 
-        atomic_fetch_add_explicit(&observer->count, 1, memory_order_relaxed);
-
         // WREN and address should be valid.
         if (!get_wren(read_reg0())) {
             // No write. Wait for clock to go low.
@@ -123,6 +121,7 @@ bus_observer_task(void *context)
         uint8_t data = get_data(reg0);
 
         // Save it, and do some sort of sync?
+        atomic_fetch_add_explicit(&observer->count, 1, memory_order_relaxed);
         atomic_store_explicit(&observer->memory[address], data, memory_order_relaxed);
     }
 }

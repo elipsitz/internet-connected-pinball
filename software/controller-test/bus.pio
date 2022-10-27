@@ -1,5 +1,3 @@
-.program bus
-
 ; Pull memory writes from the FIFO and write them to the bus.
 ;
 ; The clock pin will always be clocking at 1 MHz
@@ -11,56 +9,74 @@
 ; SET pin will be the VMA pin
 ; output pins: 12 LSB will be address, 8 MSB will be data
 ;
-; At the beginning we'll set X to 0xFFFFFFFF
-;
-; side-set clock to 0
-; PULL in data from the FIFO into the OSR (non blocking)
-; MOV from OSR to Y  -- if no data was available X == Y == 0xFFFFFFFF
-; --> [maybe wait here to make it so we don't write R/W address before we need to, wait ~250ns]
-; Now set VMA to 1 if there was data.
-;  Will require some extra work here to make sure both paths take the same length.
-;   |            set vma 0
-;   |            jmp [if x!=y] has_data
-;   |            jmp [always ] end
-;   |    has_data:
-;   |            set vma 1
-;   |    end:
-; OUT 12 bits (first address) to PINS
-; --> Wait the remainder of 500ns...
-; side-set clock to 1
-; --> wait about 225 NS (write data delay time)
-; OUT 20 bits (second address and data) to PINS
-; --> Wait the remainder of 500ns...
+; Clock divider = 3: 1 PIO cycle == 25ns, 20 cycles per clock edge
 
-pull
-out x, 32
-set pins, 0
+.program bus
+.side_set 1 opt
 
-loop:
-    set pins, 3
-    nop
-    set pins, 0
-    jmp x-- loop
-    wait 1 irq 4
+; Initialize X to 0xFFFFFFFF
+    mov x, !null
+
+.wrap_target
+    ; Clock to 0 and wait.
+    nop     [5]     side 0      
+
+    ; Pull data ([8 bit data][12 bit addr][12 bit addr]) into OSR.
+    pull noblock
+    mov y, osr
+    ; Set VMA and Output address (low 12 bits)
+    set pins 0
+    jmp x!=y, vma_on  ; If x!=y, we got data during `pull noblock`.
+    jmp vma_end
+vma_on:
+    set pins 1
+vma_end:
+    out pins, 12
+
+    ; Wait for the rest of the 500ns (at least 160ns).
+    nop     [7]
+
+    ; Clock to 1, wait up to 225 ns, then write data+address to PINS.
+    nop     [7]  side 1
+    out pins, 20
+
+    ; Wait for the rest of the 500ns.
+    nop      [7]
+    nop      [2]
+.wrap
 
 % c-sdk {
-static inline void bus_program_init(PIO pio, uint sm, uint offset, uint pin) {
+static inline void bus_program_init(
+    PIO pio, uint sm, uint offset, uint pin_clk, uint pin_vma, uint pin_ad_base
+) {
+    // Connect pins.
+    const int pin_ad_count = 20;
+    pio_gpio_init(pio, pin_clk);
+    pio_gpio_init(pio, pin_vma);
+    for (uint i = pin_ad_base; i < pin_ad_base + pin_ad_count; i += 1) {
+        pio_gpio_init(pio, i);
+    }
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_clk, 1, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_vma, 1, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_ad_base, pin_ad_count, true);
+
     pio_sm_config c = bus_program_get_default_config(offset);
 
-    // Map the state machine's OUT pin group to one pin, namely the `pin`
-    // parameter to this function.
-    sm_config_set_set_pins(&c, pin, 2);
-    // Set this pin's GPIO function (connect PIO to the pad)
-    pio_gpio_init(pio, pin);
-    pio_gpio_init(pio, pin + 1);
-    // Set the pin direction to output at the PIO
-    pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, true);
+    // 1 set pin: VMA
+    // 1 side-set pin: CLK
+    // 20 out pins: 12 address and 8 data.
+    sm_config_set_set_pins(&c, pin_vma, 1);
+    sm_config_set_sideset_pins(&c, pin_clk);
+    sm_config_set_out_pins(&c, pin_ad_base, pin_ad_count);
 
-    sm_config_set_clkdiv_int_frac(&c, 30, 0);
+    // Clock divider: 120MHz system clock / 3 == 25ns period
+    sm_config_set_clkdiv_int_frac(&c, 3, 0);
 
-    // Load our configuration, and jump to the start of the program
+    // We only use the TX FIFO.
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+
+    // Load config, jump to the start, and enable the state machine.
     pio_sm_init(pio, sm, offset, &c);
-    // Set the state machine running
     pio_sm_set_enabled(pio, sm, true);
 }
 %}
