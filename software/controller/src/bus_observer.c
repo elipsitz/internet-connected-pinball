@@ -77,16 +77,6 @@ get_data(reg0_t reg0) {
 /// D6   -> 19
 /// D7   -> 21
 
-static inline void IRAM_ATTR
-wait_for_clock(reg1_t* reg1, bool value) {
-    while (true) {
-        *reg1 = read_reg1();
-        if (get_clock(*reg1) == value) {
-            break;
-        }
-    }
-}
-
 static DRAM_ATTR char app_cpu_init_log[] = "Running bus observer on app cpu!\n";
 
 static void IRAM_ATTR
@@ -95,32 +85,41 @@ bus_observer_task(void *context)
     ets_printf(app_cpu_init_log);
 
     bus_observer_t *observer = context;
-
-    reg0_t reg0;
-    reg1_t reg1;
+    portDISABLE_INTERRUPTS();
 
     while (true) {
         // Wait for clock to go high.
-        wait_for_clock(&reg1, true);
+        while (!get_clock(read_reg1()))
+            ;
+
+        atomic_fetch_add_explicit(&observer->count, 1, memory_order_relaxed);
 
         // WREN and address should be valid.
-        reg0 = read_reg0();
-        if (!get_wren(reg0)) {
+        if (!get_wren(read_reg0())) {
             // No write. Wait for clock to go low.
-            wait_for_clock(&reg1, false);
+            while (get_clock(read_reg1()))
+                ;
             continue;
         }
-        uint16_t address = get_address(reg0, reg1);
 
         // Read reg0 and reg1, waiting for clock to go low.
+        // We're trying to capture the last value of the GPIOs before clock goes low.
+        reg0_t reg0 = {};
+        reg1_t reg1 = {};
         while (true) {
-            reg0 = read_reg0();
-            reg1 = read_reg1();
+            reg0_t reg0_new = read_reg0();
+            reg1_t reg1_new = read_reg1();
 
-            if (!get_clock(reg1)) {
+            if (get_clock(reg1_new)) {
+                // Clock is still high, so these are valid reads.
+                reg0 = reg0_new;
+                reg1 = reg1_new;
+            } else {
+                // Clock went low. Last read cycle is the final data.
                 break;
             }
         }
+        uint16_t address = get_address(reg0, reg1);
         uint8_t data = get_data(reg0);
 
         // Save it, and do some sort of sync?

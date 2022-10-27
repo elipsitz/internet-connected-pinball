@@ -11,6 +11,8 @@
 typedef struct {
     // The memory.
     uint8_t memory[PINBALL_MEMORY_LEN];
+
+    atomic_uint count;
 } bus_observer_t;
 
 /// Start the bus observer.

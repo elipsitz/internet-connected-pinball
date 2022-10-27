@@ -1,0 +1,66 @@
+.program bus
+
+; Pull memory writes from the FIFO and write them to the bus.
+;
+; The clock pin will always be clocking at 1 MHz
+; Each FIFO word will be: [8 bit data][12 bit addr][12 bit addr]
+; Addresses must match.
+; Physical output of address will be [00XX][00XX][XXXX][XXXX]
+;
+; 1 side-set pin, optional, which will be the clock
+; SET pin will be the VMA pin
+; output pins: 12 LSB will be address, 8 MSB will be data
+;
+; At the beginning we'll set X to 0xFFFFFFFF
+;
+; side-set clock to 0
+; PULL in data from the FIFO into the OSR (non blocking)
+; MOV from OSR to Y  -- if no data was available X == Y == 0xFFFFFFFF
+; --> [maybe wait here to make it so we don't write R/W address before we need to, wait ~250ns]
+; Now set VMA to 1 if there was data.
+;  Will require some extra work here to make sure both paths take the same length.
+;   |            set vma 0
+;   |            jmp [if x!=y] has_data
+;   |            jmp [always ] end
+;   |    has_data:
+;   |            set vma 1
+;   |    end:
+; OUT 12 bits (first address) to PINS
+; --> Wait the remainder of 500ns...
+; side-set clock to 1
+; --> wait about 225 NS (write data delay time)
+; OUT 20 bits (second address and data) to PINS
+; --> Wait the remainder of 500ns...
+
+pull
+out x, 32
+set pins, 0
+
+loop:
+    set pins, 3
+    nop
+    set pins, 0
+    jmp x-- loop
+    wait 1 irq 4
+
+% c-sdk {
+static inline void bus_program_init(PIO pio, uint sm, uint offset, uint pin) {
+    pio_sm_config c = bus_program_get_default_config(offset);
+
+    // Map the state machine's OUT pin group to one pin, namely the `pin`
+    // parameter to this function.
+    sm_config_set_set_pins(&c, pin, 2);
+    // Set this pin's GPIO function (connect PIO to the pad)
+    pio_gpio_init(pio, pin);
+    pio_gpio_init(pio, pin + 1);
+    // Set the pin direction to output at the PIO
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, true);
+
+    sm_config_set_clkdiv_int_frac(&c, 30, 0);
+
+    // Load our configuration, and jump to the start of the program
+    pio_sm_init(pio, sm, offset, &c);
+    // Set the state machine running
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

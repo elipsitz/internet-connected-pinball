@@ -49,9 +49,10 @@ app_main(void) {
     // Initialization complete, turn off LED.
     ESP_ERROR_CHECK(gpio_set_level(GPIO_LED, false));
     ESP_LOGI(TAG, "Initialization complete");
-
+    
     while (1) {
-        ESP_LOGI(TAG, "Alive!");
+        int new_count = bus_observer.count;
+        ESP_LOGI(TAG, "Alive! %d", new_count);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }

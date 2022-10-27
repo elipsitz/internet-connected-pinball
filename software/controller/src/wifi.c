@@ -130,4 +130,8 @@ void wifi_init(void)
     // Maybe set up captive portal in SoftAP mode.
 
     wifi_init_sta();
+
+    // Disable power saving. For whatever reason, the default
+    // power saving setting causes occasional clock misses.
+    esp_wifi_set_ps(WIFI_PS_NONE);
 }
