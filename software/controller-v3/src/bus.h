@@ -10,5 +10,4 @@
 extern uint32_t bus_count;
 extern uint8_t bus_memory[BUS_MEMORY_LEN];
 
-void bus_setup();
-void bus_loop();
+void bus_run();

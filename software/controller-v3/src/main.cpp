@@ -29,7 +29,8 @@ void setup() {
 
   Serial.println("");
   Serial.println("[wifi    ] connected");
-  Serial.printf("[wifi    ] IP address: %s\n", WiFi.localIP());
+  Serial.print("[wifi    ] IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
 void loop() {
@@ -54,11 +55,10 @@ void loop() {
 }
 
 void setup1() {
-  bus_setup();
+  bus_run();
 }
 
 void loop1() {
-  bus_loop();
 }
 
 bool upload_score()

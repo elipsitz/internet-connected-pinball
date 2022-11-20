@@ -1,0 +1,37 @@
+; Control part of the bus reading program.
+;
+; When the clock goes up, see if we're doing a valid write
+; and signal the other state machine to read the data.
+;
+; This is split into two because we only get one JMP pin
+; per state machine, and we need to check both 'WREN' and
+; CLK.
+;
+; GPIOs: 18 CLK     
+;        19 WREN  (JMP pin)
+
+.program bus_control
+
+.wrap_target
+loop:
+    ; Wait for clock rising edge
+    wait 0 gpio 18
+    wait 1 gpio 18
+    jmp pin valid_write
+    jmp loop  ; Not a valid write, wait for next cycle.
+valid_write:
+    irq set 4 ; Signal the other state machine to read.
+.wrap
+
+% c-sdk {
+static inline void bus_control_program_init(
+    PIO pio, uint sm, uint offset, uint pin_wren
+) {
+    pio_sm_config c = bus_control_program_get_default_config(offset);
+    sm_config_set_jmp_pin(&c, pin_wren);
+
+    // Load config, jump to the start, and enable the state machine.
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

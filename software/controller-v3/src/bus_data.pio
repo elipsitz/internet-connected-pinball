@@ -1,0 +1,47 @@
+; Data part of the bus reading program.
+;
+; Wait for a signal from the other program, then read/latch
+; the data until the clock falls again.
+;
+; GPIOs: 18   CLK     (JMP pin)
+;        19   WREN
+;        0-17 Data and Address
+
+.program bus_data
+
+.wrap_target
+    ; Wait for signal from control program.
+    ; Also clears the interrupt.
+    wait 1 irq 4
+
+latch:
+    mov y, x
+    mov x, pins
+    ;set x, 31
+    jmp pin, latch
+    ; Clock went low, take the second-to-last read (in Y)
+    in y, 18
+    push noblock
+.wrap
+
+% c-sdk {
+static inline void bus_data_program_init(
+    PIO pio, uint sm, uint offset, uint pin_clk, uint pin_data_base
+) {
+    // Connect pins.
+    const int pin_data_count = 18;
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_data_base, pin_data_count, false);
+
+    pio_sm_config c = bus_data_program_get_default_config(offset);
+    sm_config_set_jmp_pin(&c, pin_clk);
+    sm_config_set_in_pins(&c, pin_data_base);
+
+    // We only use the RX FIFO.
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+    sm_config_set_in_shift(&c, false, false, 32);
+
+    // Load config, jump to the start, and enable the state machine.
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}
