@@ -40,6 +40,23 @@ static const httpd_uri_t memory_uri = {
     .user_ctx = NULL,
 };
 
+static esp_err_t
+status_handler(httpd_req_t *req)
+{
+    uint32_t count = bus_observer->count;
+    char response[256];
+    sprintf(response, "total count: %u", count);
+    httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
+    return ESP_OK;
+}
+
+static const httpd_uri_t status_uri = {
+    .uri = "/status",
+    .method = HTTP_GET,
+    .handler = status_handler,
+    .user_ctx = NULL,
+};
+
 bool ui_init(bus_observer_t* bus_observer_)
 {
     bus_observer = bus_observer_;
@@ -53,6 +70,7 @@ bool ui_init(bus_observer_t* bus_observer_)
         ESP_LOGI(TAG, "Registering URI handlers");
         httpd_register_uri_handler(server, &index_uri);
         httpd_register_uri_handler(server, &memory_uri);
+        httpd_register_uri_handler(server, &status_uri);
         return true;
     } else {
         ESP_LOGI(TAG, "Error starting web UI!");

@@ -50,9 +50,11 @@ app_main(void) {
     ESP_ERROR_CHECK(gpio_set_level(GPIO_LED, false));
     ESP_LOGI(TAG, "Initialization complete");
     
+    uint32_t prev_count = 0;
     while (1) {
-        int new_count = bus_observer.count;
-        ESP_LOGI(TAG, "Alive! %d", new_count);
+        uint32_t new_count = bus_observer.count;
+        ESP_LOGI(TAG, "Alive! %d", new_count - prev_count);
+        prev_count = new_count;
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
