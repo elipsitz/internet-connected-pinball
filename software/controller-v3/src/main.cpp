@@ -4,6 +4,7 @@
 
 #include "bus.h"
 #include "secrets.h"
+#include "ui.h"
 
 #define ADDR_FLAG_GAME_OVER (0xC9)
 
@@ -31,6 +32,8 @@ void setup() {
   Serial.println("[wifi    ] connected");
   Serial.print("[wifi    ] IP address: ");
   Serial.println(WiFi.localIP());
+
+  ui_setup();
 }
 
 void loop() {
@@ -51,6 +54,7 @@ void loop() {
     last_flag_game_over = flag_game_over;
   }
 
+  ui_loop();
   delay(100);
 }
 
@@ -70,7 +74,8 @@ bool upload_score()
 
   Serial.println("[uploader] Uploading scores...");
   HTTPClient http;
-  if (!http.begin(CONFIG_WEB_HOST, CONFIG_WEB_PORT, CONFIG_WEB_UPLOAD_ENDPOINT)) {
+  http.setInsecure(); // Do not validate the server certificate.
+  if (!http.begin(CONFIG_WEB_HOST, CONFIG_WEB_PORT, CONFIG_WEB_ADD_SCORE_ENDPOINT, CONFIG_WEB_HTTPS)) {
     Serial.printf("[uploader] Failed: http.begin failed\n");
     return false;
   }

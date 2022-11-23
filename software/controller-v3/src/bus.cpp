@@ -1,6 +1,7 @@
 #include <cstring>
 
 #include <Arduino.h>
+#include <hardware/structs/bus_ctrl.h>
 
 #include "bus.h"
 #include "bus_control.pio.h"
@@ -17,6 +18,9 @@ void bus_run() {
     // Initialize memory.
     bus_count = 0;
     memset(bus_memory, 0xFF, BUS_MEMORY_LEN);
+
+    // Give this core bus priority.
+    bus_ctrl_hw->priority |= 0x00000010;
 
     // Initialize PIOs.
     PIO pio = pio0;
