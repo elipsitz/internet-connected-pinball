@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
 #include <WiFi.h>
+#include <LEAmDNS.h>
 
 #include "bus.h"
 #include "secrets.h"
@@ -33,7 +34,10 @@ void setup() {
   Serial.print("[wifi    ] IP address: ");
   Serial.println(WiFi.localIP());
 
+  Serial.printf("[mdns    ] hostname %s.local\n", CONFIG_HOSTNAME);
+  MDNS.begin(CONFIG_HOSTNAME);
   ui_setup();
+  MDNS.addService("http", "tcp", 80);
 }
 
 void loop() {
@@ -55,6 +59,7 @@ void loop() {
   }
 
   ui_loop();
+  MDNS.update();
   delay(100);
 }
 
@@ -79,6 +84,7 @@ bool upload_score()
     Serial.printf("[uploader] Failed: http.begin failed\n");
     return false;
   }
+  http.addHeader("Authorization", CONFIG_WEB_AUTH);
   http.addHeader("Content-Type", "application/octet-stream");
   int httpCode = http.POST(payload);
 
