@@ -1,0 +1,1 @@
+INSTANCE_PATH=$(pwd)/data/ FLASK_DEBUG=1 python3 -m flask "$@"
