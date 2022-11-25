@@ -1,6 +1,7 @@
 #include <cstring>
 
 #include <Arduino.h>
+#include <hardware/gpio.h>
 #include <hardware/structs/bus_ctrl.h>
 
 #include "bus.h"
@@ -10,6 +11,7 @@
 #define PIN_DATA_BASE (0)
 #define PIN_CLK (18)
 #define PIN_WREN (19)
+#define PIN_OE (20)
 
 uint32_t bus_count;
 uint8_t bus_memory[BUS_MEMORY_LEN];
@@ -30,6 +32,11 @@ void bus_run() {
     uint data_offset = pio_add_program(pio, &bus_data_program);
     uint data_sm = pio_claim_unused_sm(pio, true);
     bus_data_program_init(pio, data_sm, data_offset, PIN_CLK, PIN_DATA_BASE);
+
+    // Set output enable (active low).
+    gpio_init(PIN_OE);
+    gpio_set_dir(PIN_OE, GPIO_OUT);
+    gpio_put(PIN_OE, 0);
 
     // Read data from PIO loop.
     // TODO: use DMA so we don't miss anything.
