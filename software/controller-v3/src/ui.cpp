@@ -8,8 +8,6 @@
 WebServer web_server(80);
 HTTPUpdateServer http_updater;
 
-extern String logs;
-
 void ui_setup()
 {
     web_server.on("/", []() {
@@ -22,9 +20,6 @@ void ui_setup()
         String response = "total count: ";
         response += bus_count;
         web_server.send(200, "text/plain", response);
-    });
-    web_server.on("/logs", []() {
-        web_server.send(200, "text/plain", logs);
     });
     web_server.on("/gpio", []() {
         uint32_t gpio = gpio_get_all();
