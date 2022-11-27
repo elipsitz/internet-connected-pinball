@@ -75,11 +75,13 @@ bool upload_score()
   // First construct payload using current snapshot of memory.
   String payload = "{\"machine_id\": 1, \"format\": \"williams-sys7-v1\"}";
   payload.concat((char)0);
-  payload.concat(bus_memory, BUS_MEMORY_LEN);
+  payload.concat(const_cast<const uint8_t*>(bus_memory), BUS_MEMORY_LEN);
 
   Serial.println("[uploader] Uploading scores...");
   HTTPClient http;
-  http.setInsecure(); // Do not validate the server certificate.
+  if (CONFIG_WEB_HTTPS) {
+    http.setInsecure(); // Do not validate the server certificate.
+  }
   if (!http.begin(CONFIG_WEB_HOST, CONFIG_WEB_PORT, CONFIG_WEB_ADD_SCORE_ENDPOINT, CONFIG_WEB_HTTPS)) {
     Serial.printf("[uploader] Failed: http.begin failed\n");
     return false;

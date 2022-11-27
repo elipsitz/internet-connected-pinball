@@ -21,7 +21,7 @@ static const uint16_t bus_data_program_instructions[] = {
     0xa041, //  1: mov    y, x                       
     0xa020, //  2: mov    x, pins                    
     0x00c1, //  3: jmp    pin, 1                     
-    0x4052, //  4: in     y, 18                      
+    0xa0c2, //  4: mov    isr, y                     
     0x8000, //  5: push   noblock                    
             //     .wrap
 };

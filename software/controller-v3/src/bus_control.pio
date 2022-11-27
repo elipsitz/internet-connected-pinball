@@ -30,6 +30,10 @@ static inline void bus_control_program_init(
     pio_sm_config c = bus_control_program_get_default_config(offset);
     sm_config_set_jmp_pin(&c, pin_wren);
 
+    pio_sm_set_consecutive_pindirs(pio, sm, 18, 2, false);
+    pio_gpio_init(pio, 18);
+    pio_gpio_init(pio, 19);
+
     // Load config, jump to the start, and enable the state machine.
     pio_sm_init(pio, sm, offset, &c);
     pio_sm_set_enabled(pio, sm, true);

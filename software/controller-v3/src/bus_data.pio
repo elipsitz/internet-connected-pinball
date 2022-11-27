@@ -14,13 +14,17 @@
     ; Also clears the interrupt.
     wait 1 irq 4
 
+    ; set x 14
+    ; mov isr x [31]
+    ; push noblock [31]
+
 latch:
     mov y, x
     mov x, pins
     ;set x, 31
     jmp pin, latch
     ; Clock went low, take the second-to-last read (in Y)
-    in y, 18
+    mov isr y
     push noblock
 .wrap
 
