@@ -1,6 +1,7 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_template
 import json
 import os
+import pytz
 
 from . import models
 from .models import db
@@ -20,9 +21,20 @@ def create_app(extra_config=None):
 
     db.init_app(app)
 
+    @app.template_filter()
+    def commaify(value):
+        return "{:,}".format(value)
+
+    @app.template_filter()
+    def format_time(dt):
+        dt = pytz.UTC.localize(dt)
+        dt = dt.astimezone(pytz.timezone('America/Chicago'))
+        return dt.strftime('%Y-%m-%d %I:%M %p')
+
     @app.route("/")
     def index():
-        return "<h1>It works!</h1>"
+        scores = models.Score.query.order_by(models.Score.score.desc())
+        return render_template("scores.html", scores=scores)
 
     @app.route("/api/v1/add_score", methods=('POST',))
     def add_score():

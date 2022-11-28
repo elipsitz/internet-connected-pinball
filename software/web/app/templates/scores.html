@@ -1,0 +1,19 @@
+<h1>Pinball Scores</h1>
+<h3>Laser Cue</h3>
+
+<table border="1">
+    <tr>
+        <th>#</th>
+        <th>Date</th>
+        <th>Player</th>
+        <th>Score</th>
+    </tr>
+{% for score in scores -%}
+    <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ score.created_at | format_time }}</td>
+        <td>{{ score.player }}</td>
+        <td>{{ score.score | commaify }}</td>
+    </tr>
+{% endfor %}
+</table>
