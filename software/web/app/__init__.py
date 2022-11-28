@@ -60,16 +60,15 @@ def create_app(extra_config=None):
         header = json.loads(header)
         body = data[(offset + 1):]
 
-        if header.get("format") != "williams-sys7-v1":
+        if header.get("format") not in ["williams-sys7-v1", "williams-sys7-v2"]:
             print("Unsupported format: ", header.get("format"))
             abort(400)
-        memory = System7Memory(body)
 
-        # TODO: create a raw score (associated with the machine)
-        # TODO: create the corresponding parsed scores, add them to DB, and commit.
-        print("Got new scores!")
+        print("Got new scores! len=", len(body))
         raw_score = models.RawScore(machine=machine, data=body)
         db.session.add(raw_score)
+
+        memory = System7Memory(body[-1024:]) # Use the last memory snapshot.
         for i, score in enumerate(memory.player_scores):
             print(f"  Player {i + 1}: {score}")
             entry = models.Score(

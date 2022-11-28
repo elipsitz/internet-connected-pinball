@@ -1,17 +1,13 @@
 #include <Arduino.h>
-#include <HTTPClient.h>
 #include <WiFi.h>
 #include <LEAmDNS.h>
 
 #include "bus.h"
 #include "secrets.h"
 #include "ui.h"
-
-#define ADDR_FLAG_GAME_OVER (0xC9)
+#include "game.h"
 
 WiFiMulti multi;
-
-bool upload_score();
 
 void setup() {
   Serial.begin();
@@ -38,26 +34,12 @@ void setup() {
   MDNS.begin(CONFIG_HOSTNAME);
   ui_setup();
   MDNS.addService("http", "tcp", 80);
+
+  game_init();
 }
 
 void loop() {
-  // Check every 100ms to see if we need to upload scores.
-  static uint8_t last_flag_game_over = 0xFF;
-  uint8_t flag_game_over = bus_memory[ADDR_FLAG_GAME_OVER];
-  if (flag_game_over != last_flag_game_over) {
-    Serial.printf("[game    ] flag game over %d -> %d\n", last_flag_game_over, flag_game_over);
-
-    if (flag_game_over == 0) {
-      Serial.println("[game    ] Started new game.");
-    }
-    if (last_flag_game_over == 0) {
-      Serial.println("[game    ] Game over!");
-      upload_score();
-    }
-
-    last_flag_game_over = flag_game_over;
-  }
-
+  game_check_state();
   ui_loop();
   MDNS.update();
   delay(100);
@@ -68,39 +50,4 @@ void setup1() {
 }
 
 void loop1() {
-}
-
-bool upload_score()
-{
-  // First construct payload using current snapshot of memory.
-  String payload = "{\"machine_id\": 1, \"format\": \"williams-sys7-v1\"}";
-  payload.concat((char)0);
-  payload.concat(const_cast<const uint8_t*>(bus_memory), BUS_MEMORY_LEN);
-
-  Serial.println("[uploader] Uploading scores...");
-  HTTPClient http;
-  if (CONFIG_WEB_HTTPS) {
-    http.setInsecure(); // Do not validate the server certificate.
-  }
-  if (!http.begin(CONFIG_WEB_HOST, CONFIG_WEB_PORT, CONFIG_WEB_ADD_SCORE_ENDPOINT, CONFIG_WEB_HTTPS)) {
-    Serial.printf("[uploader] Failed: http.begin failed\n");
-    return false;
-  }
-  http.addHeader("Authorization", CONFIG_WEB_AUTH);
-  http.addHeader("Content-Type", "application/octet-stream");
-  int httpCode = http.POST(payload);
-
-  bool success = false;
-  if (httpCode == HTTP_CODE_OK) {
-    Serial.print("[uploader] ok: ");
-    Serial.println(http.getString());
-    success = true;
-  } else if (httpCode > 0) {
-    Serial.printf("[uploader] Failed: http %d\n", httpCode);
-  } else {
-    Serial.printf("[uploader] Failed: error: %s\n", http.errorToString(httpCode).c_str());
-  }
-
-  http.end();
-  return success;
 }
