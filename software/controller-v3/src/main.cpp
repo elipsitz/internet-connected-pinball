@@ -42,6 +42,18 @@ void loop() {
   game_check_state();
   ui_loop();
   MDNS.update();
+
+  // Make sure we're still connectd.
+  if (!WiFi.connected()) {
+    Serial.print("[wifi    ] No longer connected! Reconnecting...");
+    if (multi.run() != WL_CONNECTED) {
+      Serial.println("[wifi    ] Unable to reconnect. Rebooting.");
+      delay(500);
+      rp2040.reboot();
+    }
+    Serial.print("[wifi    ] Reconnected");
+  }
+
   delay(100);
 }
 

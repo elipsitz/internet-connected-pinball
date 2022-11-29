@@ -57,7 +57,10 @@ void game_check_state()
       num_snapshots = 0;
       capture_snapshot();
     }
-    if (last_flag_game_over == 0) {
+    // If we move from flag 0...
+    // or if we move *to* 1 (and we previously had 0xFF, the default value),
+    // indicating that we missed the game start.
+    if (last_flag_game_over == 0 || (flag_game_over == 1 && last_flag_game_over == 0xFF)) {
       Serial.println("[game    ] Game over!");
       capture_snapshot();
       upload_score();

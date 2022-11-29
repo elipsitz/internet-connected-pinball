@@ -8,7 +8,22 @@ class System7Memory:
 
     @property
     def num_players(self) -> int:
-        return self.memory[0xCC] + 1
+        raw = self.memory[0xCC]
+        if raw <= 3:
+            return raw + 1
+        else:
+            # The player count isn't right.
+            # Most likely, it's 0xFF, uninitialized memory.
+            # Try to infer this from the player scores.
+            num_players = 0
+            for i in range(0, 4):
+                addr = 0x38 + (i * 4)
+                data = self.memory[addr:(addr + 4)]
+                if data != bytes([0xFF, 0xFF, 0xFF, 0xFF]):
+                    num_players += 1
+                else:
+                    break
+            return num_players
 
     @property
     def player_scores(self) -> List[int]:
