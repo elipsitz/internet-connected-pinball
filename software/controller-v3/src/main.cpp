@@ -9,6 +9,9 @@
 
 WiFiMulti multi;
 
+#define PING_PERIOD (60 * 1000)
+static uint32_t last_ping = 0;
+
 void setup() {
   Serial.begin();
 
@@ -52,6 +55,15 @@ void loop() {
       rp2040.reboot();
     }
     Serial.print("[wifi    ] Reconnected");
+  }
+
+  // XXX: Hack to keep the WiFi connection active.
+  // https://github.com/micropython/micropython/issues/9455 (?)
+  if (millis() - last_ping > PING_PERIOD) {
+    Serial.println("[wifi    ] Pinging server...");
+    WiFi.ping(CONFIG_WEB_HOST);
+    Serial.println("[wifi    ] ping complete.");
+    last_ping = millis();
   }
 
   delay(100);
