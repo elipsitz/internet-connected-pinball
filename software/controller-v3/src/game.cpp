@@ -11,8 +11,8 @@
 #define ADDR_BALL_IN_PLAY (0x58)
 #define ADDR_PLAYER_UP (0xCD)
 
-// Max snapshots: 5 balls, 4 players, and one at game over.
-#define MAX_SNAPSHOTS 21
+// Max snapshots: 5 balls + game over.
+#define MAX_SNAPSHOTS 6
 static uint8_t snapshot_data[BUS_MEMORY_LEN * MAX_SNAPSHOTS];
 static size_t num_snapshots;
 
@@ -72,8 +72,8 @@ void game_check_state()
         Serial.println("[game    ] Restarted current game.");
         num_snapshots = 0;
         capture_snapshot();
-    } else if (ball_in_play > last_ball_in_play || player_up > last_player_up) {
-        Serial.println("[game    ] Next ball / player.");
+    } else if (ball_in_play > last_ball_in_play) {
+        Serial.println("[game    ] Next ball");
         capture_snapshot();
     }
   }
