@@ -8,25 +8,29 @@
 </head>
 <body>
 
-<h1>Pinball Scores</h1>
-<h3>Laser Cue</h3>
+<header class="d-flex flex-wrap justify-content-center py-1 mb-4 border-bottom">
+  <span class="fs-2"><strong>Pinball Scores</strong></span>
+</header>
 
-<table class="table table-hover">
-    <tr>
-        <th>#</th>
-        <th>Date</th>
-        <th>Player</th>
-        <th>Score</th>
-    </tr>
+<div class="container">
+  <span class="fs-4">Laser Cue</span>
+  <table class="table table-hover">
+      <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Player</th>
+          <th>Score</th>
+      </tr>
 {% for score in scores -%}
-    <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ score.created_at | format_time }}</td>
-        <td>{{ score.player }}</td>
-        <td>{{ score.score | commaify }}</td>
-    </tr>
+      <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ score.created_at | format_time }}</td>
+          <td>{{ score.player }}</td>
+          <td>{{ score.score | commaify }}</td>
+      </tr>
 {% endfor %}
-</table>
+  </table>
+</div>
 
 </body>
 </html>
