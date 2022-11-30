@@ -18,8 +18,13 @@ void ui_setup()
         web_server.send(200, "application/octet-stream", bus_memory, BUS_MEMORY_LEN);
     });
     web_server.on("/status", []() {
-        String response = "total count: ";
+        String response;
+        response += "total bus writes: ";
         response += bus_count;
+        response += "\nheap usage: ";
+        response += rp2040.getUsedHeap();
+        response += " of ";
+        response += rp2040.getTotalHeap();
         web_server.send(200, "text/plain", response);
     });
     web_server.on("/gpio", []() {
