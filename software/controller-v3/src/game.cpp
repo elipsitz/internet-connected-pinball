@@ -19,11 +19,13 @@ static size_t num_snapshots;
 static uint8_t last_flag_game_over;
 static uint8_t last_player_up;
 static uint8_t last_ball_in_play;
+static bool in_game;
 
 bool upload_score();
 
 void game_init()
 {
+    in_game = false;
     last_flag_game_over = 0xFF;
     last_player_up = 0xFF;
     last_ball_in_play = 0xFF;
@@ -54,14 +56,16 @@ void game_check_state()
 
     if (flag_game_over == 0) {
       Serial.println("[game    ] Started new game.");
+      in_game = true;
       num_snapshots = 0;
       capture_snapshot();
     }
     // If we move from flag 0...
-    // or if we move *to* 1 (and we previously had 0xFF, the default value),
-    // indicating that we missed the game start.
-    if (last_flag_game_over == 0 || (flag_game_over == 1 && last_flag_game_over == 0xFF)) {
+    // or if we move *to* 2 (and we previously didn't think we were in a game,
+    // indicating that we missed the game start).
+    if (last_flag_game_over == 0 || (flag_game_over == 2 && !in_game)) {
       Serial.println("[game    ] Game over!");
+      in_game = false;
       capture_snapshot();
       upload_score();
     }
@@ -70,6 +74,7 @@ void game_check_state()
     if (ball_in_play == 0xF1 && last_ball_in_play != 0xF1) {
         // We restarted the current game.
         Serial.println("[game    ] Restarted current game.");
+        in_game = true;
         num_snapshots = 0;
         capture_snapshot();
     } else if (ball_in_play > last_ball_in_play) {
