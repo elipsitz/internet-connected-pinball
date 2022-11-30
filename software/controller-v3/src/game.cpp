@@ -7,6 +7,7 @@
 #include "secrets.h"
 #include "bus.h"
 #include "game.h"
+#include "log.h"
 
 #define ADDR_FLAG_GAME_OVER (0xC9)
 #define ADDR_BALL_IN_PLAY (0x58)
@@ -63,7 +64,7 @@ void storage_init()
   LittleFS.begin();
   if (!LittleFS.exists(snapshot_directory)) {
     if (!LittleFS.mkdir(snapshot_directory)) {
-      Serial.println("[storage ] Failed to make snapshot directory");
+      log_log("storage", "Failed to make snapshot directory");
       return;
     }
   }
@@ -79,7 +80,7 @@ void storage_try_upload()
   auto dir = LittleFS.openDir(snapshot_directory);
   while (dir.next()) {
     size_t file_size = dir.fileSize();
-    Serial.printf("[storage ] Found snapshot %s, size %zu\n", dir.fileName().c_str(), file_size);
+    log_log("storage", "Found snapshot %s, size %zu", dir.fileName().c_str(), file_size);
     if (file_size > 0) {
       File f = dir.openFile("r");
       String payload = read_file_to_string(f);
@@ -91,15 +92,15 @@ void storage_try_upload()
       }
       bool success = upload_score_with_payload(payload);
       if (success) {
-        Serial.println("[storage ] Upload successful");
+        log_log("storage", "Upload successful");
         String path = snapshot_directory;
         path += "/";
         path += dir.fileName();
         if (!LittleFS.remove(path)) {
-          Serial.println("[storage ] Failed to delete file");
+          log_log("storage", "Failed to delete file");
         }
       } else {
-        Serial.println("[storage ] Upload failed, aborting.");
+        log_log("storage", "Upload failed, aborting.");
         // No point of trying the rest of them...
         return;
       }
@@ -114,15 +115,15 @@ void storage_save(String& payload)
   path += rp2040.hwrand32();
   File f = LittleFS.open(path, "w");
   if (!f) {
-    Serial.println("[storage ] File open FAILED!");
+    log_log("storage", "File open FAILED!");
     return;
   }
   size_t written = f.write(payload.begin(), payload.length());
   f.close();
   if (written == payload.length()) {
-    Serial.println("[storage ] File saved successfully.");
+    log_log("storage", "File saved successfully.");
   } else {
-    Serial.printf("[storage ] Failed to write whole file (wrote %zu)\n", written);
+    log_log("storage", "Failed to write whole file (wrote %zu)", written);
     LittleFS.remove(path);
   }
 }
@@ -130,7 +131,7 @@ void storage_save(String& payload)
 void capture_snapshot()
 {
     if (num_snapshots == MAX_SNAPSHOTS) {
-        Serial.println("[game    ] Error, hit max snapshots");
+        log_log("game", "Error, hit max snapshots");
         return;
     }
     memcpy(
@@ -148,17 +149,17 @@ void game_check_state()
   uint8_t ball_in_play = bus_memory[ADDR_BALL_IN_PLAY];
 
   if (flag_game_over != last_flag_game_over) {
-    Serial.printf("[game    ] flag game over %d -> %d\n", last_flag_game_over, flag_game_over);
+    log_log("game", "flag game over %d -> %d", last_flag_game_over, flag_game_over);
 
     if (flag_game_over == 0) {
-      Serial.println("[game    ] Started new game.");
+      log_log("game", "Started new game.");
       in_game = true;
       num_snapshots = 0;
       capture_snapshot();
     }
     // If we move from flag 0.
     if (last_flag_game_over == 0) {
-      Serial.println("[game    ] Game over!");
+      log_log("game", "Game over!");
       in_game = false;
       capture_snapshot();
       upload_score();
@@ -167,12 +168,12 @@ void game_check_state()
     // In a game.
     if (ball_in_play == 0xF1 && last_ball_in_play != 0xF1) {
         // We restarted the current game.
-        Serial.println("[game    ] Restarted current game.");
+        log_log("game", "Restarted current game.");
         in_game = true;
         num_snapshots = 0;
         capture_snapshot();
     } else if (ball_in_play > last_ball_in_play) {
-        Serial.println("[game    ] Next ball");
+        log_log("game", "Next ball");
         capture_snapshot();
     }
   }
@@ -197,7 +198,7 @@ bool upload_score()
   bool success = upload_score_with_payload(payload);
 
   if (!success) {
-    Serial.println("[uploader ] Upload failed, saving to storage");
+    log_log("uploader", "Upload failed, saving to storage");
     storage_save(payload);
   }
   return success;
@@ -205,13 +206,13 @@ bool upload_score()
 
 bool upload_score_with_payload(String& payload)
 {
-  Serial.printf("[uploader] Uploading scores, size = %u\n", payload.length());
+  log_log("uploader", "Uploading scores, size = %u", payload.length());
   HTTPClient http;
   if (CONFIG_WEB_HTTPS) {
     http.setInsecure(); // Do not validate the server certificate.
   }
   if (!http.begin(CONFIG_WEB_HOST, CONFIG_WEB_PORT, CONFIG_WEB_ADD_SCORE_ENDPOINT, CONFIG_WEB_HTTPS)) {
-    Serial.printf("[uploader] Failed: http.begin failed\n");
+    log_log("uploader", "Failed: http.begin failed");
     return false;
   }
   http.addHeader("Authorization", CONFIG_WEB_AUTH);
@@ -220,13 +221,13 @@ bool upload_score_with_payload(String& payload)
 
   bool success = false;
   if (httpCode == HTTP_CODE_OK) {
-    Serial.print("[uploader] ok: ");
-    Serial.println(http.getString());
+    String response = http.getString();
+    log_log("uploader", "ok: %s", response.c_str());
     success = true;
   } else if (httpCode > 0) {
-    Serial.printf("[uploader] Failed: http %d\n", httpCode);
+    log_log("uploader", "Failed: http %d", httpCode);
   } else {
-    Serial.printf("[uploader] Failed: error: %s\n", http.errorToString(httpCode).c_str());
+    log_log("uploader", "Failed: error: %s", http.errorToString(httpCode).c_str());
   }
 
   http.end();

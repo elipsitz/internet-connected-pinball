@@ -7,6 +7,7 @@
 #include "secrets.h"
 #include "ui.h"
 #include "game.h"
+#include "log.h"
 
 WiFiMulti multi;
 
@@ -14,26 +15,24 @@ WiFiMulti multi;
 static uint32_t last_ping = 0;
 
 void setup() {
-  Serial.begin();
-  Serial.println("[main    ] Initializing...");
+  log_init();
+  log_log("main", "Initializing...");
   pinMode(PIN_LED, OUTPUT);
   digitalWrite(PIN_LED, HIGH);
 
   // Connect to wifi.
-  Serial.print("[wifi    ] Connecting to ");
-  Serial.println(CONFIG_WIFI_SSID);
+  log_log("wifi", "Connecting to %s", CONFIG_WIFI_SSID);
   multi.addAP(CONFIG_WIFI_SSID, CONFIG_WIFI_PASS);
   if (multi.run() != WL_CONNECTED) {
-    Serial.println("Unable to connect to network, rebooting in 10 seconds...");
+    log_log("wifi", "Unable to connect, rebooting in 10 seconds...");
     delay(10000);
     rp2040.reboot();
   }
-  Serial.println("");
-  Serial.println("[wifi    ] connected");
-  Serial.print("[wifi    ] IP address: ");
-  Serial.println(WiFi.localIP());
+  log_log("wifi", "connected");
+  String ip = WiFi.localIP().toString();
+  log_log("wifi", "Connected! IP address: %s", ip.c_str());
 
-  Serial.printf("[mdns    ] hostname %s.local\n", CONFIG_HOSTNAME);
+  log_log("mdns", "hostname %s.local", CONFIG_HOSTNAME);
   MDNS.begin(CONFIG_HOSTNAME);
   ui_setup();
   MDNS.addService("http", "tcp", 80);
@@ -41,7 +40,7 @@ void setup() {
   game_init();
 
   digitalWrite(PIN_LED, LOW);
-  Serial.println("[main    ] Init done");
+  log_log("main", "Init done");
 }
 
 void loop() {
@@ -52,9 +51,9 @@ void loop() {
   // XXX: Hack to keep the WiFi connection active.
   // https://github.com/micropython/micropython/issues/9455 (?)
   if (millis() - last_ping > PING_PERIOD) {
-    Serial.println("[wifi    ] Pinging server...");
+    log_log("wifi", "Pinging server...");
     WiFi.ping(CONFIG_WEB_HOST);
-    Serial.println("[wifi    ] ping complete.");
+    log_log("wifi", "ping complete.");
     last_ping = millis();
   }
 

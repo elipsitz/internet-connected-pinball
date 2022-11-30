@@ -4,6 +4,7 @@
 #include <hardware/gpio.h>
 
 #include "bus.h"
+#include "log.h"
 
 WebServer web_server(80);
 HTTPUpdateServer http_updater;
@@ -41,8 +42,8 @@ void ui_setup()
     http_updater.setup(&web_server);
     web_server.begin();
 
-    Serial.println("[ui      ] started on port 80");
-    Serial.println("[ui      ] OTA available at /update");
+    log_log("ui", "started on port 80");
+    log_log("ui", "OTA available at /update");
 }
 
 void ui_loop()
