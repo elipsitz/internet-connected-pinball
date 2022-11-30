@@ -49,17 +49,6 @@ void loop() {
   ui_loop();
   MDNS.update();
 
-  // Make sure we're still connectd.
-  if (!WiFi.connected()) {
-    Serial.print("[wifi    ] No longer connected! Reconnecting...");
-    if (multi.run() != WL_CONNECTED) {
-      Serial.println("[wifi    ] Unable to reconnect. Rebooting.");
-      delay(500);
-      rp2040.reboot();
-    }
-    Serial.print("[wifi    ] Reconnected");
-  }
-
   // XXX: Hack to keep the WiFi connection active.
   // https://github.com/micropython/micropython/issues/9455 (?)
   if (millis() - last_ping > PING_PERIOD) {

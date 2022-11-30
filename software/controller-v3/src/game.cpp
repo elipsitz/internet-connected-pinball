@@ -156,10 +156,8 @@ void game_check_state()
       num_snapshots = 0;
       capture_snapshot();
     }
-    // If we move from flag 0...
-    // or if we move *to* 2 (and we previously didn't think we were in a game,
-    // indicating that we missed the game start).
-    if (last_flag_game_over == 0 || (flag_game_over == 2 && !in_game)) {
+    // If we move from flag 0.
+    if (last_flag_game_over == 0) {
       Serial.println("[game    ] Game over!");
       in_game = false;
       capture_snapshot();
