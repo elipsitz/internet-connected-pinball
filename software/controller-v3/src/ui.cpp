@@ -39,6 +39,14 @@ void ui_setup()
         }
         web_server.send(200, "text/html", response);
     });
+    web_server.on("/logs", []() {
+        String response;
+        for (String& log : log_get_logs()) {
+            response += log;
+            response += '\n';
+        }
+        web_server.send(200, "text/plain", response);
+    });
     http_updater.setup(&web_server);
     web_server.begin();
 

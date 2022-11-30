@@ -4,6 +4,10 @@
 
 #include "log.h"
 
+#define MAX_LOG_LINES (32)
+
+std::deque<String> logs;
+
 void log_init()
 {
     Serial.begin();
@@ -11,6 +15,9 @@ void log_init()
 
 void log_log(const char* tag, const char* format, ...)
 {
+    if (logs.size() == MAX_LOG_LINES) {
+        logs.pop_front();
+    }
     String formatted;
     
     uint32_t time = millis();
@@ -30,4 +37,10 @@ void log_log(const char* tag, const char* format, ...)
     va_end(args);
 
     Serial.println(formatted);
+    logs.push_back(formatted);
+}
+
+std::deque<String>& log_get_logs()
+{
+    return logs;
 }
