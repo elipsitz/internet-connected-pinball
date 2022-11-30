@@ -15,7 +15,7 @@ static uint32_t last_ping = 0;
 
 void setup() {
   Serial.begin();
-  Serial.print("[main    ] Booted up.");
+  Serial.println("[main    ] Initializing...");
   pinMode(PIN_LED, OUTPUT);
   digitalWrite(PIN_LED, HIGH);
 
@@ -41,6 +41,7 @@ void setup() {
   game_init();
 
   digitalWrite(PIN_LED, LOW);
+  Serial.println("[main    ] Init done");
 }
 
 void loop() {

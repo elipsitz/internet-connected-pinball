@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <HTTPClient.h>
+#include <LittleFS.h>
 
 #include "secrets.h"
 #include "bus.h"
@@ -10,6 +11,10 @@
 #define ADDR_FLAG_GAME_OVER (0xC9)
 #define ADDR_BALL_IN_PLAY (0x58)
 #define ADDR_PLAYER_UP (0xCD)
+
+#define STORAGE_CHECK_PERIOD (60 * 1000)
+String snapshot_directory = "/snapshots";
+static uint32_t last_storage_check = 0;
 
 // Max snapshots: 5 balls + game over.
 #define MAX_SNAPSHOTS 6
@@ -22,6 +27,10 @@ static uint8_t last_ball_in_play;
 static bool in_game;
 
 bool upload_score();
+bool upload_score_with_payload(String& payload);
+void storage_init();
+void storage_save(String& payload);
+void storage_try_upload();
 
 void game_init()
 {
@@ -29,6 +38,93 @@ void game_init()
     last_flag_game_over = 0xFF;
     last_player_up = 0xFF;
     last_ball_in_play = 0xFF;
+
+    storage_init();
+    num_snapshots = 0;
+}
+
+// Reads the rest of the content in the file to the string.
+// Like File::readString, except with proper handling with null bytes.
+String read_file_to_string(File& f)
+{
+  String ret;
+  ret.reserve(f.size() - f.position());
+  uint8_t buffer[256];
+  int read;
+  do {
+    read = f.read(buffer, sizeof(buffer));
+    ret.concat(buffer, read);
+  } while (read > 0);
+  return ret;
+}
+
+void storage_init()
+{
+  LittleFS.begin();
+  if (!LittleFS.exists(snapshot_directory)) {
+    if (!LittleFS.mkdir(snapshot_directory)) {
+      Serial.println("[storage ] Failed to make snapshot directory");
+      return;
+    }
+  }
+
+  // BUG: For some reason, trying to upload right after reboot doesn't work.
+  // storage_try_upload();
+}
+
+// Check for stored game data and attempt to upload it.
+void storage_try_upload()
+{
+  bool slept = false;
+  auto dir = LittleFS.openDir(snapshot_directory);
+  while (dir.next()) {
+    size_t file_size = dir.fileSize();
+    Serial.printf("[storage ] Found snapshot %s, size %zu\n", dir.fileName().c_str(), file_size);
+    if (file_size > 0) {
+      File f = dir.openFile("r");
+      String payload = read_file_to_string(f);
+      f.close();
+
+      if (!slept) {
+        delay(2000);
+        slept = true;
+      }
+      bool success = upload_score_with_payload(payload);
+      if (success) {
+        Serial.println("[storage ] Upload successful");
+        String path = snapshot_directory;
+        path += "/";
+        path += dir.fileName();
+        if (!LittleFS.remove(path)) {
+          Serial.println("[storage ] Failed to delete file");
+        }
+      } else {
+        Serial.println("[storage ] Upload failed, aborting.");
+        // No point of trying the rest of them...
+        return;
+      }
+    }
+  }
+}
+
+void storage_save(String& payload)
+{
+  String path = snapshot_directory;
+  path += "/";
+  path += rp2040.hwrand32();
+  File f = LittleFS.open(path, "w");
+  if (!f) {
+    Serial.println("[storage ] File open FAILED!");
+    return;
+  }
+  size_t written = f.write(payload.begin(), payload.length());
+  f.close();
+  if (written == payload.length()) {
+    Serial.println("[storage ] File saved successfully.");
+  } else {
+    Serial.printf("[storage ] Failed to write whole file (wrote %zu)\n", written);
+    LittleFS.remove(path);
+  }
 }
 
 void capture_snapshot()
@@ -86,6 +182,11 @@ void game_check_state()
   last_flag_game_over = flag_game_over;
   last_player_up = player_up;
   last_ball_in_play = ball_in_play;
+
+  if (millis() - last_storage_check > STORAGE_CHECK_PERIOD) {
+    storage_try_upload();
+    last_storage_check = millis();
+  }
 }
 
 bool upload_score()
@@ -95,7 +196,17 @@ bool upload_score()
   String payload = "{\"format\": \"williams-sys7-v2\"}";
   payload.concat((char)0);
   payload.concat(snapshot_data, num_snapshots * BUS_MEMORY_LEN);
+  bool success = upload_score_with_payload(payload);
 
+  if (!success) {
+    Serial.println("[uploader ] Upload failed, saving to storage");
+    storage_save(payload);
+  }
+  return success;
+}
+
+bool upload_score_with_payload(String& payload)
+{
   Serial.printf("[uploader] Uploading scores, size = %u\n", payload.length());
   HTTPClient http;
   if (CONFIG_WEB_HTTPS) {
