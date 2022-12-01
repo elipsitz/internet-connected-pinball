@@ -22,7 +22,7 @@ void log_log(const char* tag, const char* format, ...)
     
     uint32_t time = millis();
     char buffer[128];
-    int len = snprintf(buffer, sizeof(buffer), "[%d.%03d][%8.8s] ", time / 1000, time % 1000, tag);
+    int len = snprintf(buffer, sizeof(buffer), "[%5d.%03d][%8.8s] ", time / 1000, time % 1000, tag);
     formatted.concat(buffer, len);
 
     va_list args;

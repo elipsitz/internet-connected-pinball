@@ -28,9 +28,8 @@ void setup() {
     delay(10000);
     rp2040.reboot();
   }
-  log_log("wifi", "connected");
   String ip = WiFi.localIP().toString();
-  log_log("wifi", "Connected! IP address: %s", ip.c_str());
+  log_log("wifi", "Connected! IP: %s", ip.c_str());
 
   log_log("mdns", "hostname %s.local", CONFIG_HOSTNAME);
   MDNS.begin(CONFIG_HOSTNAME);
