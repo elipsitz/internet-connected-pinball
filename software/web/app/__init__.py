@@ -29,7 +29,7 @@ def create_app(extra_config=None):
     def format_time(dt):
         dt = pytz.UTC.localize(dt)
         dt = dt.astimezone(pytz.timezone('America/Chicago'))
-        return dt.strftime('%Y-%m-%d %I:%M %p')
+        return dt.strftime('%Y-%-m-%d %-I:%M %p')
 
     @app.route("/")
     def index():
