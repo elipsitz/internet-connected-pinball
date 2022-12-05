@@ -21,7 +21,7 @@ class Machine(db.Model, _TimeMixin):
     kind = db.Column(db.Integer)
 
 
-class RawScore(db.Model, _TimeMixin):
+class Game(db.Model, _TimeMixin):
     id = db.Column(db.Integer, primary_key=True)
     machine_id = db.Column(db.Integer, db.ForeignKey("machine.id"), nullable=False)
     data = db.Column(db.LargeBinary)
@@ -32,9 +32,9 @@ class RawScore(db.Model, _TimeMixin):
 class Score(db.Model, _TimeMixin):
     id = db.Column(db.Integer, primary_key=True)
     machine_id = db.Column(db.Integer, db.ForeignKey("machine.id"), nullable=False)
-    raw_score_id = db.Column(db.Integer, db.ForeignKey("raw_score.id"), nullable=False)
+    game_id = db.Column(db.Integer, db.ForeignKey("game.id"), nullable=False)
     player = db.Column(db.Integer)
     score = db.Column(db.Integer)
 
     machine = db.relationship("Machine")
-    raw_score = db.relationship("RawScore")
+    game = db.relationship("Game")

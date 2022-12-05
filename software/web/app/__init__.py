@@ -65,15 +65,15 @@ def create_app(extra_config=None):
             abort(400)
 
         print("Got new scores! len=", len(body))
-        raw_score = models.RawScore(machine=machine, data=body)
-        db.session.add(raw_score)
+        game = models.Game(machine=machine, data=body)
+        db.session.add(game)
 
         memory = System7Memory(body[-1024:]) # Use the last memory snapshot.
         for i, score in enumerate(memory.player_scores):
             print(f"  Player {i + 1}: {score}")
             entry = models.Score(
                 machine=machine,
-                raw_score=raw_score,
+                game=game,
                 player=(i + 1),
                 score=score
             )
