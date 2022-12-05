@@ -74,7 +74,7 @@ def create_app(extra_config=None):
             entry = models.Score(
                 machine=machine,
                 game=game,
-                player=(i + 1),
+                player_num=(i + 1),
                 score=score
             )
             db.session.add(entry)

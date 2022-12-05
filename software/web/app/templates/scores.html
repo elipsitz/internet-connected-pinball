@@ -26,7 +26,7 @@
       <tr>
           <td>{{ loop.index }}</td>
           <td>{{ score.created_at | format_time }}</td>
-          <td>{{ score.player }}</td>
+          <td>{{ score.player_num }}</td>
           <td>{{ score.score | commaify }}</td>
       </tr>
 {% endfor %}

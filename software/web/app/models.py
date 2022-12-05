@@ -33,8 +33,9 @@ class Score(db.Model, _TimeMixin):
     id = db.Column(db.Integer, primary_key=True)
     machine_id = db.Column(db.Integer, db.ForeignKey("machine.id"), nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey("game.id"), nullable=False)
-    player = db.Column(db.Integer)
+    player_num = db.Column(db.Integer)
     score = db.Column(db.Integer)
+    player_name = db.Column(db.Text, nullable=True)
 
     machine = db.relationship("Machine")
     game = db.relationship("Game")
