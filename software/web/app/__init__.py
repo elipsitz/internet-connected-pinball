@@ -36,6 +36,15 @@ def create_app(extra_config=None):
         scores = models.Score.query.order_by(models.Score.score.desc())
         return render_template("scores.html", scores=scores)
 
+    @app.route("/game/<int:game_id>")
+    def show_game(game_id):
+        game = models.Game.query.get_or_404(game_id)
+        snapshots = [
+            str(System7Memory(game.data[(i * 1024):(i * 1024 + 1024)]))
+            for i in range(0, len(game.data) // 1024)
+        ]
+        return render_template("game.html", snapshots=snapshots)
+
     @app.route("/api/v1/add_score", methods=('POST',))
     def add_score():
         # Lookup api key to find the Machine.

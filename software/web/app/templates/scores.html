@@ -25,7 +25,11 @@
 {% for score in scores -%}
       <tr>
           <td>{{ loop.index }}</td>
-          <td>{{ score.created_at | format_time }}</td>
+          <td>
+            <a href="{{ url_for('show_game', game_id=score.game_id) }}">
+              {{ score.created_at | format_time }}
+            </a>
+          </td>
           <td>{{ score.player_num }}</td>
           <td>{{ score.score | commaify }}</td>
       </tr>
