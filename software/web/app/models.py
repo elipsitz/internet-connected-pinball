@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 
 db = SQLAlchemy()
 
@@ -39,3 +39,8 @@ class Score(db.Model, _TimeMixin):
 
     machine = db.relationship("Machine")
     game = db.relationship("Game")
+
+    @property
+    def recent(self) -> bool:
+        age = datetime.utcnow() - self.created_at
+        return age < timedelta(hours=1)

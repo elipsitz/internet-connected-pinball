@@ -91,6 +91,17 @@ def create_app(extra_config=None):
 
         return "ok"
 
+    @app.route("/api/v1/set_player_name", methods=('POST',))
+    def set_player_name():
+        score_id = request.form["score_id"]
+        player_name = request.form["player_name"].strip()[:3]
+        score = models.Score.query.get_or_404(score_id)
+        if (score.player_name is not None) or (not score.recent):
+            abort(400)
+        score.player_name = player_name
+        db.session.commit()
+        return "ok"
+
     return app
 
 

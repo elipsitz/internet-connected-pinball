@@ -1,0 +1,5 @@
+.btn-tiny {
+  --bs-btn-padding-y: .1rem;
+  --bs-btn-padding-x: .5rem;
+  --bs-btn-font-size: 1rem;
+}
