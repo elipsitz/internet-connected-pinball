@@ -2,3 +2,4 @@ flask
 gunicorn
 Flask-SQLAlchemy
 pytz
+flask_admin

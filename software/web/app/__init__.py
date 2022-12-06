@@ -3,7 +3,7 @@ import json
 import os
 import pytz
 
-from . import models
+from . import admin, models
 from .models import db
 from .memory import System7Memory
 
@@ -14,7 +14,10 @@ app.config.from_mapping(
     SQLALCHEMY_DATABASE_URI="sqlite:///" + os.path.join(app.instance_path, "db.sqlite"),
     SQLALCHEMY_ECHO=app.config["DEBUG"],
 )
+with open(os.path.join(instance_path, "config.json")) as f:
+    app.config.from_mapping(json.load(f))
 db.init_app(app)
+admin.init_app(app)
 
 @app.template_filter()
 def commaify(value):
