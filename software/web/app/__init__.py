@@ -7,102 +7,92 @@ from . import models
 from .models import db
 from .memory import System7Memory
 
-# Create app.
-def create_app(extra_config=None):
-    instance_path = os.environ.get("INSTANCE_PATH", "/data")
+instance_path = os.environ.get("INSTANCE_PATH", "/data")
+app = Flask(__name__, instance_path=instance_path)
+app.config.from_mapping(
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    SQLALCHEMY_DATABASE_URI="sqlite:///" + os.path.join(app.instance_path, "db.sqlite"),
+    SQLALCHEMY_ECHO=app.config["DEBUG"],
+)
+db.init_app(app)
 
-    app = Flask(__name__, instance_path=instance_path)
-    app.config.from_mapping(
-        SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        SQLALCHEMY_DATABASE_URI="sqlite:///"
-        + os.path.join(app.instance_path, "db.sqlite"),
-        SQLALCHEMY_ECHO=app.config["DEBUG"],
-    )
+@app.template_filter()
+def commaify(value):
+    return "{:,}".format(value)
 
-    db.init_app(app)
+@app.template_filter()
+def format_time(dt):
+    dt = pytz.UTC.localize(dt)
+    dt = dt.astimezone(pytz.timezone('America/Chicago'))
+    return dt.strftime('%Y-%-m-%d %-I:%M %p')
 
-    @app.template_filter()
-    def commaify(value):
-        return "{:,}".format(value)
+@app.route("/")
+def index():
+    scores = models.Score.query.order_by(models.Score.score.desc())
+    return render_template("scores.html", scores=scores)
 
-    @app.template_filter()
-    def format_time(dt):
-        dt = pytz.UTC.localize(dt)
-        dt = dt.astimezone(pytz.timezone('America/Chicago'))
-        return dt.strftime('%Y-%-m-%d %-I:%M %p')
+@app.route("/game/<int:game_id>")
+def show_game(game_id):
+    game = models.Game.query.get_or_404(game_id)
+    snapshots = [
+        str(System7Memory(game.data[(i * 1024):(i * 1024 + 1024)]))
+        for i in range(0, len(game.data) // 1024)
+    ]
+    return render_template("game.html", snapshots=snapshots)
 
-    @app.route("/")
-    def index():
-        scores = models.Score.query.order_by(models.Score.score.desc())
-        return render_template("scores.html", scores=scores)
+@app.route("/api/v1/add_score", methods=('POST',))
+def add_score():
+    # Lookup api key to find the Machine.
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        abort(403)
+    auth_token = auth_header.replace("Bearer ", "")
 
-    @app.route("/game/<int:game_id>")
-    def show_game(game_id):
-        game = models.Game.query.get_or_404(game_id)
-        snapshots = [
-            str(System7Memory(game.data[(i * 1024):(i * 1024 + 1024)]))
-            for i in range(0, len(game.data) // 1024)
-        ]
-        return render_template("game.html", snapshots=snapshots)
+    try:
+        machine = models.Machine.query.filter_by(auth_token=auth_token).one()
+    except:
+        abort(403)
 
-    @app.route("/api/v1/add_score", methods=('POST',))
-    def add_score():
-        # Lookup api key to find the Machine.
-        auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
-            abort(403)
-        auth_token = auth_header.replace("Bearer ", "")
+    # Decode the request.
+    # JSON data, then a NULL byte, then the payload
+    data = request.data
+    try:
+        offset = data.index(0)
+    except:
+        abort(400)
+    header = data[:offset].decode('utf-8')
+    header = json.loads(header)
+    body = data[(offset + 1):]
 
-        try:
-            machine = models.Machine.query.filter_by(auth_token=auth_token).one()
-        except:
-            abort(403)
+    if header.get("format") not in ["williams-sys7-v1", "williams-sys7-v2"]:
+        print("Unsupported format: ", header.get("format"))
+        abort(400)
 
-        # Decode the request.
-        # JSON data, then a NULL byte, then the payload
-        data = request.data
-        try:
-            offset = data.index(0)
-        except:
-            abort(400)
-        header = data[:offset].decode('utf-8')
-        header = json.loads(header)
-        body = data[(offset + 1):]
+    print("Got new scores! len=", len(body))
+    game = models.Game(machine=machine, data=body)
+    db.session.add(game)
 
-        if header.get("format") not in ["williams-sys7-v1", "williams-sys7-v2"]:
-            print("Unsupported format: ", header.get("format"))
-            abort(400)
+    memory = System7Memory(body[-1024:]) # Use the last memory snapshot.
+    for i, score in enumerate(memory.player_scores):
+        print(f"  Player {i + 1}: {score}")
+        entry = models.Score(
+            machine=machine,
+            game=game,
+            player_num=(i + 1),
+            score=score
+        )
+        db.session.add(entry)
+    db.session.commit()
 
-        print("Got new scores! len=", len(body))
-        game = models.Game(machine=machine, data=body)
-        db.session.add(game)
+    return "ok"
 
-        memory = System7Memory(body[-1024:]) # Use the last memory snapshot.
-        for i, score in enumerate(memory.player_scores):
-            print(f"  Player {i + 1}: {score}")
-            entry = models.Score(
-                machine=machine,
-                game=game,
-                player_num=(i + 1),
-                score=score
-            )
-            db.session.add(entry)
-        db.session.commit()
-
-        return "ok"
-
-    @app.route("/api/v1/set_player_name", methods=('POST',))
-    def set_player_name():
-        score_id = request.form["score_id"]
-        player_name = request.form["player_name"].strip()[:3]
-        score = models.Score.query.get_or_404(score_id)
-        if (score.player_name is not None) or (not score.recent):
-            abort(400)
-        score.player_name = player_name
-        db.session.commit()
-        return "ok"
-
-    return app
-
-
-app = create_app()
+@app.route("/api/v1/set_player_name", methods=('POST',))
+def set_player_name():
+    score_id = request.form["score_id"]
+    player_name = request.form["player_name"].strip()[:3]
+    score = models.Score.query.get_or_404(score_id)
+    if (score.player_name is not None) or (not score.recent):
+        abort(400)
+    score.player_name = player_name
+    db.session.commit()
+    return "ok"
