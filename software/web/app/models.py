@@ -38,7 +38,7 @@ class Score(db.Model, _TimeMixin):
     player_name = db.Column(db.Text, nullable=True)
 
     machine = db.relationship("Machine")
-    game = db.relationship("Game")
+    game = db.relationship("Game", backref="scores")
 
     @property
     def recent(self) -> bool:

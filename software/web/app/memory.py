@@ -1,6 +1,35 @@
 import itertools
 from typing import List
 
+class System7Game:
+    def __init__(self, data: bytes) -> None:
+        self.snapshots = [
+            System7Memory(data[(i * 1024):(i * 1024 + 1024)])
+            for i in range(0, len(data) // 1024)
+        ]
+
+    @property
+    def final_snapshot(self):
+        return self.snapshots[-1]
+
+    def num_balls(self):
+        balls = max(s.ball_in_play for s in self.snapshots)
+        if balls == 0:
+            return 5
+        return balls
+
+    def num_players(self):
+        return self.final_snapshot.num_players
+
+    def scores_at_ball(self, ball):
+        for s in self.snapshots:
+            if s.ball_in_play == ball:
+                return s.player_scores
+            elif s.ball_in_play > ball:
+                break
+        return None
+    
+
 class System7Memory:
     def __init__(self, memory: bytes) -> None:
         assert len(memory) == 1024

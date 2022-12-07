@@ -5,7 +5,7 @@ import pytz
 
 from . import admin, models
 from .models import db
-from .memory import System7Memory
+from .memory import System7Memory, System7Game
 
 instance_path = os.environ.get("INSTANCE_PATH", "/data")
 app = Flask(__name__, instance_path=instance_path)
@@ -36,12 +36,9 @@ def index():
 
 @app.route("/game/<int:game_id>")
 def show_game(game_id):
-    game = models.Game.query.get_or_404(game_id)
-    snapshots = [
-        str(System7Memory(game.data[(i * 1024):(i * 1024 + 1024)]))
-        for i in range(0, len(game.data) // 1024)
-    ]
-    return render_template("game.html", snapshots=snapshots)
+    model = models.Game.query.get_or_404(game_id)
+    game = System7Game(model.data)
+    return render_template("game.html", model=model, game=game)
 
 @app.route("/api/v1/add_score", methods=('POST',))
 def add_score():
