@@ -10,13 +10,11 @@
 </head>
 <body>
 
-<header class="d-flex flex-wrap justify-content-center py-1 mb-4 border-bottom">
+<header class="d-flex flex-wrap justify-content-center py-1 mb-2 border-bottom">
   <span class="fs-2"><strong>Pinball Scores</strong></span>
 </header>
 
-<div class="container">
-  {% block content %}{% endblock %}
-</div>
+{% block content %}{% endblock %}
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script src="/static/script.js"></script>

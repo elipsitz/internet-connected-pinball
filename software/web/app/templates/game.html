@@ -2,66 +2,64 @@
 {% block title %}Pinball Scores{% endblock %}
 
 {% block content %}
+<div class="container">
+    <div class="card mb-3">
+        <div class="card-header">Game Info</div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Machine</dt>
+                <dd class="col-sm-3">{{ model.machine.name }}</dd>
+            </dl>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Date</dt>
+                <dd class="col-sm-3">{{ model.created_at | format_time }}</dd>
+            </dl>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Players</dt>
+                <dd class="col-sm-3">{{ game.num_players() }}</dd>
+            </dl>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Balls</dt>
+                <dd class="col-sm-3">{{ game.num_balls() }}</dd>
+            </dl>
+        </div>
+    </div>
 
-<div class="card mb-3">
-    <div class="card-header">Game Info</div>
-    <div class="card-body">
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Machine</dt>
-            <dd class="col-sm-3">{{ model.machine.name }}</dd>
-        </dl>
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Date</dt>
-            <dd class="col-sm-3">{{ model.created_at | format_time }}</dd>
-        </dl>
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Players</dt>
-            <dd class="col-sm-3">{{ game.num_players() }}</dd>
-        </dl>
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Balls</dt>
-            <dd class="col-sm-3">{{ game.num_balls() }}</dd>
-        </dl>
+    <div class="card">
+        <div class="card-header">Scores by Ball</div>
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th></th>
+                    {% for i in range(game.num_players()) %}
+                        <th class="text-center">
+                            Player {{ loop.index }}
+                            <br>
+                            {{ model.scores[i].player_name or "?" }}
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(game.num_balls()) %}
+                    {% if loop.last %}
+                        {% set scores = game.final_snapshot.player_scores %}
+                    {% else %}
+                        {% set scores = game.scores_at_ball(i + 2) %}
+                    {% endif %}
+                    {% if scores is not none %}
+                        <tr class="{% if loop.last %}table-active{% endif %}">
+                            <th>{{ loop.index }}</th>
+                            {% for score in scores %}
+                                <td class="text-center">{{ score | commaify }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
-
-
-<div class="card">
-    <div class="card-header">Scores by Ball</div>
-    <table class="table mb-0">
-        <thead>
-            <tr>
-                <th></th>
-                {% for i in range(game.num_players()) %}
-                    <th class="text-center">
-                        Player {{ loop.index }}
-                        <br>
-                        {{ model.scores[i].player_name or "?" }}
-                    </th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for i in range(game.num_balls()) %}
-                {% if loop.last %}
-                    {% set scores = game.final_snapshot.player_scores %}
-                {% else %}
-                    {% set scores = game.scores_at_ball(i + 2) %}
-                {% endif %}
-                {% if scores is not none %}
-                    <tr class="{% if loop.last %}table-active{% endif %}">
-                        <th>{{ loop.index }}</th>
-                        {% for score in scores %}
-                            <td class="text-center">{{ score | commaify }}</td>
-                        {% endfor %}
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-
 {% endblock %}
 
 <!--
