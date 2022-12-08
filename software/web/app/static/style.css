@@ -3,3 +3,27 @@
   --bs-btn-padding-x: .5rem;
   --bs-btn-font-size: 1rem;
 }
+
+th.sortable {
+  cursor: pointer;
+}
+
+th.sortable {
+  background-image: url("/static/sort.svg");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 0.5rem) 50%;
+  background-size: 0.5rem;
+  padding-right: 1.5rem;
+}
+
+th.sortable.asc {
+  background-image: url("/static/sort-up.svg");
+}
+
+th.sortable.desc {
+  background-image: url("/static/sort-down.svg");
+}
+
+th.sortable:hover::after {
+  color: #333;
+}

@@ -4,13 +4,13 @@
 {% block content %}
 <div class="container-md px-0">
   <h4 class="text-center">Laser Cue</h4>
-  <table class="table table-striped table-sm">
+  <table class="table table-striped table-sm table-bordered">
       <tr>
           <th>#</th>
-          <th>Date</th>
-          <th>P.#</th>
-          <th>Player</th>
-          <th>Score</th>
+          <th data-key="created_at" class="sortable {{ sort_order if sort_key == 'created_at' else ''}}">Date</th>
+          <th data-key="score" class="sortable {{ sort_order if sort_key == 'score' else ''}}">Score</th>
+          <th data-key="player_name" class="sortable {{ sort_order if sort_key == 'player_name' else ''}}">Name</th>
+          <th>P</th>
       </tr>
       {% for score in scores -%}
       <tr class="align-middle">
@@ -20,7 +20,7 @@
               {{ score.created_at | format_time }}
             </a>
           </td>
-          <td>{{ score.player_num }}</td>
+          <td>{{ score.score | commaify }}</td>
           <td>
             {% if score.player_name is not none %}   
               {{ score.player_name }}
@@ -33,7 +33,7 @@
               <span class="text-muted fst-italic">?</span>
             {% endif %}
           </td>
-          <td>{{ score.score | commaify }}</td>
+          <td>{{ score.player_num }}</td>
       </tr>
       {% endfor %}
   </table>

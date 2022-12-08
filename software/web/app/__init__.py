@@ -31,8 +31,26 @@ def format_time(dt):
 
 @app.route("/")
 def index():
-    scores = models.Score.query.order_by(models.Score.score.desc())
-    return render_template("scores.html", scores=scores)
+    valid_keys = ("created_at", "score", "player_name")
+    valid_orders = ("desc", "asc")
+
+    sort_key = "score"
+    sort_order = "desc"
+    sort_key = request.args.get("sort") or sort_key
+    sort_order = request.args.get("order") or sort_order
+
+    if sort_key in valid_keys and sort_order in valid_orders:
+        sort = getattr(getattr(models.Score, sort_key), sort_order)()
+    else:
+        sort = models.Score.score.desc()
+
+    scores = models.Score.query.order_by(sort)
+    return render_template(
+        "scores.html",
+        scores=scores,
+        sort_key=sort_key,
+        sort_order=sort_order
+    )
 
 @app.route("/game/<int:game_id>")
 def show_game(game_id):
