@@ -10,7 +10,6 @@
           <th data-key="created_at" class="sortable {{ sort_order if sort_key == 'created_at' else ''}}">Date</th>
           <th data-key="score" class="sortable {{ sort_order if sort_key == 'score' else ''}}">Score</th>
           <th data-key="player_name" class="sortable {{ sort_order if sort_key == 'player_name' else ''}}">Name</th>
-          <th>P</th>
       </tr>
       {% for score in scores -%}
       <tr class="align-middle">
@@ -33,7 +32,6 @@
               <span class="text-muted fst-italic">?</span>
             {% endif %}
           </td>
-          <td>{{ score.player_num }}</td>
       </tr>
       {% endfor %}
   </table>
