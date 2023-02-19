@@ -27,3 +27,11 @@ th.sortable.desc {
 th.sortable:hover::after {
   color: #333;
 }
+
+.main-container {
+  max-width: 60em;
+}
+
+.score-table tr :first-child {
+  width: 0;
+}

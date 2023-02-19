@@ -2,9 +2,9 @@
 {% block title %}Pinball Scores{% endblock %}
 
 {% block content %}
-<div class="container-md px-0">
+<div class="container-md px-0 main-container">
   <h4 class="text-center">Laser Cue</h4>
-  <table class="table table-striped table-sm table-bordered">
+  <table class="table table-striped table-sm table-bordered score-table">
       <tr>
           <th>#</th>
           <th data-key="created_at" class="sortable {{ sort_order if sort_key == 'created_at' else ''}}">Date</th>
