@@ -32,6 +32,6 @@ th.sortable:hover::after {
   max-width: 60em;
 }
 
-.score-table tr :first-child {
+.score-table tr > td:first-child {
   width: 0;
 }
