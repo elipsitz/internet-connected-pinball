@@ -11,7 +11,7 @@ None of the code here is production quality, it's purely for reference and inspi
 ## Contents
 * `address-decoder`: Program for the ATF16V8 PLD chip, used as an address decoder
 * `controller`: Raspberry Pi Pico W controller software
-* `controller-test`: Software for testing whether a controller can receive all bus writes
+* `testing`: Software written to help test the device during development
 * `pcb`: KiCad design files for the PCB
 * `web`: Flask webapp showing pinball scores and score upload API
 * `obsolete`: Obsolete software: original ESP32-based controller, RP2040 proof of concept
