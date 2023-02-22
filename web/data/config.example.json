@@ -1,0 +1,4 @@
+{
+  "ADMIN_USERNAME": "username",
+  "ADMIN_PASSWORD": "<Password hash generated with werkzeug.generate_password_hash>"
+}
