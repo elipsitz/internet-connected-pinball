@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "freertos.h": "c",
+        "gpio.h": "c",
+        "esp_attr.h": "c",
+        "bus_observer.h": "c",
+        "task.h": "c",
+        "*.ipp": "c",
+        "functional": "c",
+        "nvs_flash.h": "c",
+        "esp_wifi.h": "c",
+        "esp_log.h": "c",
+        "bare_metal_app_cpu.h": "c",
+        "esp_http_server.h": "c"
+    }
+}
