@@ -27,6 +27,7 @@ class Game(db.Model, _TimeMixin):
     data = db.Column(db.LargeBinary)
 
     machine = db.relationship("Machine")
+    scores = db.relationship("Score", backref="game", cascade="all, delete-orphan")
 
 
 class Score(db.Model, _TimeMixin):
@@ -38,7 +39,6 @@ class Score(db.Model, _TimeMixin):
     player_name = db.Column(db.Text, nullable=True)
 
     machine = db.relationship("Machine")
-    game = db.relationship("Game", backref="scores")
 
     @property
     def recent(self) -> bool:

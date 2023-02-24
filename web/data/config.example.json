@@ -1,4 +1,5 @@
 {
   "ADMIN_USERNAME": "username",
-  "ADMIN_PASSWORD": "<Password hash generated with werkzeug.generate_password_hash>"
+  "ADMIN_PASSWORD": "<Password hash generated with werkzeug.generate_password_hash>",
+  "SECRET_KEY": "random secret key for Flask"
 }
