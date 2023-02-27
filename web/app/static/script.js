@@ -1,13 +1,18 @@
 $(document).ready(function() {
     $(".set-player-name").click(function() {
-        let element = $(this);
-        let player_name = window.prompt("Enter player initials:");
-        if (player_name != null && player_name != "") {
-            player_name = player_name.toUpperCase();
+        const element = $(this);
+        const score_id = element.data("score-id");
+        const modal = new bootstrap.Modal("#player-name-modal");
+        const input = $("#player-name-input");
+        input.val("");
+        $("#save-player-name").off("click");
+        $("#save-player-name").click(function() {
+            let player_name = input.val().toUpperCase();
+
             $.post({
                 url: "/api/v1/set_player_name",
                 data: {
-                    "score_id": $(this).data("score-id"),
+                    "score_id": score_id,
                     "player_name": player_name,
                 }
             })
@@ -16,7 +21,14 @@ $(document).ready(function() {
             })
             .fail(function(_, _, xhr) {
                 alert("Error: " + xhr);
-            });
-        }
+            })
+            .always(function() {
+                modal.hide();
+            })
+        });
+        modal.show();
+    });
+    $('#player-name-modal').on("shown.bs.modal", () => {
+        $("#player-name-input").focus();
     });
 });

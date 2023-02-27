@@ -47,4 +47,26 @@
       {% endfor %}
   </table>
 </div>
+
+<div class="modal fade" id="player-name-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Enter player initials</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control" id="player-name-input" maxlength="3"
+          spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">
+        <div class="form-text">
+          Maximum 3 characters
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save-player-name">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

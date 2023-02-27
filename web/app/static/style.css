@@ -40,3 +40,7 @@ th.sortable > a:hover {
 .score-table tr > td:first-child {
   width: 0;
 }
+
+#player-name-input {
+  text-transform: uppercase;
+}
