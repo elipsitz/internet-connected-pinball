@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, render_template
+from flask import Flask, request, abort, render_template, send_file
 import json
 import os
 import pytz
@@ -28,6 +28,10 @@ def format_time(dt):
     dt = pytz.UTC.localize(dt)
     dt = dt.astimezone(pytz.timezone('America/Chicago'))
     return dt.strftime('%Y-%-m-%d %-I:%M %p')
+
+@app.route("/robots.txt")
+def robots_txt():
+    return send_file("static/robots.txt")
 
 @app.route("/")
 def index():
