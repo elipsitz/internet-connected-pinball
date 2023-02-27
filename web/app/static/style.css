@@ -5,10 +5,15 @@
 }
 
 th.sortable {
-  cursor: pointer;
+/*  cursor: pointer;*/
 }
 
-th.sortable {
+th.sortable > a {
+  display: block;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+
   background-image: url("/static/sort.svg");
   background-repeat: no-repeat;
   background-position: calc(100% - 0.5rem) 50%;
@@ -16,15 +21,15 @@ th.sortable {
   padding-right: 1.5rem;
 }
 
-th.sortable.asc {
+th.sortable.asc > a {
   background-image: url("/static/sort-up.svg");
 }
 
-th.sortable.desc {
+th.sortable.desc > a {
   background-image: url("/static/sort-down.svg");
 }
 
-th.sortable:hover::after {
+th.sortable > a:hover {
   color: #333;
 }
 

@@ -19,16 +19,4 @@ $(document).ready(function() {
             });
         }
     });
-
-    $("th.sortable").click(function() {
-        let key = $(this).data("key");
-        let order = "desc";
-        if ($(this).hasClass("desc")) {
-            order = "asc";
-        }
-        let searchParams = new URLSearchParams(window.location.search)
-        searchParams.set("sort", key);
-        searchParams.set("order", order);
-        window.location.search = searchParams.toString();
-    });
 });

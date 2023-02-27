@@ -1,15 +1,26 @@
 {% extends "layout.html" %}
 {% block title %}Pinball Scores{% endblock %}
 
+{% macro sort_header(key, text) -%}
+<th data-key="{{ key }}" class="sortable {{ sort_order if sort_key == key else ''}}">
+  <a href="{{
+    url_for(
+      'index',
+      sort=key,
+      order=('asc' if (sort_order == 'desc' and sort_key == key) else 'desc'))
+  }}">{{ text }}</a>
+</th>
+{%- endmacro %}
+
 {% block content %}
 <div class="container-md px-0 main-container">
   <h4 class="text-center">Laser Cue</h4>
   <table class="table table-striped table-sm table-bordered score-table">
       <tr>
           <th>#</th>
-          <th data-key="created_at" class="sortable {{ sort_order if sort_key == 'created_at' else ''}}">Date</th>
-          <th data-key="score" class="sortable {{ sort_order if sort_key == 'score' else ''}}">Score</th>
-          <th data-key="player_name" class="sortable {{ sort_order if sort_key == 'player_name' else ''}}">Name</th>
+          {{ sort_header('created_at', 'Date') }}
+          {{ sort_header('score', 'Score') }}
+          {{ sort_header('name', 'Name') }}
       </tr>
       {% for score in scores -%}
       <tr class="align-middle">
